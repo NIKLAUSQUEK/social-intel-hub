@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trend Jacking — Social Intel</title>
+  <style>
+    :root {
+      --bg:#0B1020; --panel:#141A2E; --panel-2:#1A2140;
+      --text:#E6E8EF; --muted:#8B92A8; --accent:#7C5CFF;
+      --ok:#4ADE80; --warn:#FBBF24; --err:#FF6B6B; --cyan:#22D3EE; --pink:#F472B6;
+      --line:rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px;
+      font-family: ui-sans-serif, system-ui, 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    header {
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:16px; flex-wrap:wrap; margin-bottom:20px;
+    }
+    h1 { margin:0; font-size:22px; font-weight:700; }
+    .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+    .meta { color:var(--muted); font-size:12px; margin-top:6px; }
+    .beta-pill { background:rgba(244,114,182,0.15); color:var(--pink); padding:2px 10px; border-radius:999px; font-size:10px; text-transform:uppercase; letter-spacing:1px; font-weight:700; }
+
+    select, button, input {
+      background:var(--panel); color:var(--text);
+      border:1px solid var(--line); border-radius:8px;
+      padding:8px 12px; font-size:13px; cursor:pointer; font-family:inherit;
+    }
+    button.primary { background:var(--accent); border-color:var(--accent); font-weight:600; }
+    button:disabled { opacity:0.5; cursor:not-allowed; }
+    .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(380px, 1fr));
+      gap:14px;
+      margin-top:14px;
+    }
+    .trend {
+      background:var(--panel); border:1px solid var(--line);
+      border-radius:14px; padding:18px;
+      position:relative; overflow:hidden;
+    }
+    .trend.high::before {
+      content:''; position:absolute; top:0; left:0; bottom:0; width:3px;
+      background:var(--accent); border-radius:14px 0 0 14px;
+    }
+    .trend.medium::before {
+      content:''; position:absolute; top:0; left:0; bottom:0; width:3px;
+      background:var(--warn); border-radius:14px 0 0 14px;
+    }
+    .trend.low::before {
+      content:''; position:absolute; top:0; left:0; bottom:0; width:3px;
+      background:var(--muted); border-radius:14px 0 0 14px;
+    }
+
+    .trend-header { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; }
+    .trend-title { font-weight:700; font-size:15px; line-height:1.3; }
+    .relevance-badge {
+      font-size:11px; padding:3px 9px; border-radius:999px;
+      font-weight:700; flex-shrink:0;
+    }
+    .relevance-badge.high   { background:rgba(124,92,255,0.18); color:var(--accent); }
+    .relevance-badge.medium { background:rgba(251,191,36,0.18); color:var(--warn); }
+    .relevance-badge.low    { background:rgba(255,255,255,0.05); color:var(--muted); }
+
+    .summary { color:var(--muted); font-size:13px; line-height:1.5; margin:6px 0 10px; }
+    .pill-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+    .pill {
+      font-size:10px; padding:3px 8px; border-radius:4px;
+      text-transform:uppercase; letter-spacing:0.05em; font-weight:600;
+    }
+    .pill.cat { background:rgba(34,211,238,0.10); color:var(--cyan); }
+    .pill.viral-peaking { background:rgba(244,114,182,0.18); color:var(--pink); }
+    .pill.viral-rising  { background:rgba(74,222,128,0.18); color:var(--ok); }
+    .pill.viral-saturated { background:rgba(251,191,36,0.18); color:var(--warn); }
+    .pill.viral-decaying  { background:rgba(255,107,107,0.18); color:var(--err); }
+    .pill.shelf { background:rgba(255,255,255,0.05); color:var(--muted); }
+
+    .section-label {
+      font-size:10px; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.08em;
+      font-weight:600; margin:12px 0 4px;
+    }
+
+    .copy-card {
+      background:rgba(124,92,255,0.05);
+      border:1px solid rgba(124,92,255,0.2);
+      border-radius:10px;
+      padding:12px 14px;
+      margin-bottom:8px;
+    }
+    .copy-card .angle-row {
+      display:flex; justify-content:space-between; align-items:center;
+      gap:6px; margin-bottom:6px;
+    }
+    .copy-card .angle-tag {
+      font-size:10px; color:var(--accent); font-weight:600;
+      text-transform:uppercase; letter-spacing:0.05em;
+    }
+    .copy-card .format-tag {
+      font-size:10px; padding:2px 7px; border-radius:4px;
+      background:rgba(34,211,238,0.10); color:var(--cyan); font-weight:600;
+    }
+    .copy-card .risk-tag {
+      font-size:10px; padding:2px 7px; border-radius:4px; font-weight:700;
+      text-transform:uppercase;
+    }
+    .risk-tag.safe { background:rgba(74,222,128,0.12); color:var(--ok); }
+    .risk-tag.moderate { background:rgba(251,191,36,0.12); color:var(--warn); }
+    .risk-tag.spicy { background:rgba(255,107,107,0.12); color:var(--err); }
+
+    .hook { font-weight:600; font-size:14px; line-height:1.4; margin:6px 0 8px; color:var(--text); }
+    .body { font-size:13px; line-height:1.5; color:var(--muted); margin-bottom:6px; }
+    .cta { font-size:12px; color:var(--cyan); font-style:italic; margin-top:6px; }
+    .why { font-size:11px; color:var(--muted); border-top:1px solid var(--line); padding-top:6px; margin-top:8px; font-style:italic; }
+
+    .copy-btn {
+      background:transparent; border:1px solid var(--line);
+      color:var(--muted); padding:4px 10px; font-size:11px;
+      border-radius:4px; cursor:pointer;
+    }
+    .copy-btn:hover { color:var(--accent); border-color:var(--accent); }
+
+    .empty { padding:60px 20px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:12px; margin-top:14px; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(124,92,255,0.3); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .empty-state-cta {
+      display:inline-block; margin-top:10px;
+      padding:8px 16px; background:var(--accent); color:white;
+      border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>🔥 Trend Jacking <span class="beta-pill">Beta</span></h1>
+      <div class="sub">Hot topics scored against each client's pillars + ready-to-post copy in their voice.</div>
+      <div class="meta" id="metaLine"></div>
+    </div>
+    <div class="controls">
+      <select id="clientSelect">
+        <option value="">All clients (global feed)</option>
+      </select>
+      <button class="primary" id="refreshBtn">✨ Refresh trends</button>
+      <button id="generateBtn" disabled>🎯 Generate copy for client</button>
+    </div>
+  </header>
+
+  <div id="content" class="empty">Loading…</div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    const content = document.getElementById('content');
+    const metaLine = document.getElementById('metaLine');
+
+    async function loadClients() {
+      const res = await fetch('/api/clients');
+      const json = await res.json();
+      const list = (json.data || json).filter(c => c.active !== false).sort((a, b) => a.name.localeCompare(b.name));
+      list.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id; opt.textContent = c.name;
+        clientSelect.appendChild(opt);
+      });
+      const url = new URLSearchParams(location.search).get('client');
+      if (url && list.some(c => c.id === url)) clientSelect.value = url;
+    }
+
+    async function load() {
+      const cid = clientSelect.value;
+      generateBtn.disabled = !cid;
+      content.innerHTML = '<div class="empty"><span class="spinner"></span> Loading…</div>';
+      try {
+        if (cid) {
+          const res = await fetch(`/api/trend-jacking/${cid}`);
+          if (res.status === 404) {
+            content.innerHTML = `<div class="empty">
+              No trend-jacks for <strong>${escapeHtml(cid)}</strong> yet.<br/>
+              <span style="font-size:12px;color:var(--muted);">Click 🎯 Generate copy to score trends + write copy in this client's voice.</span>
+            </div>`;
+            metaLine.textContent = '';
+            return;
+          }
+          const j = await res.json();
+          renderClient(j.data);
+        } else {
+          const res = await fetch('/api/trend-jacking');
+          if (res.status === 404) {
+            content.innerHTML = `<div class="empty">
+              No trends scanned yet.<br/>
+              <span style="font-size:12px;">Click ✨ Refresh trends to scan the web (60-90s, ~$0.30).</span>
+            </div>`;
+            metaLine.textContent = '';
+            return;
+          }
+          const j = await res.json();
+          renderGlobal(j.data);
+        }
+      } catch (err) {
+        content.innerHTML = `<div class="empty">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function renderGlobal(data) {
+      const refreshed = data.refreshedAt ? new Date(data.refreshedAt).toLocaleString('en-GB') : '';
+      metaLine.innerHTML = `<strong>${data.count}</strong> trends · ${data.month} feed · refreshed ${escapeHtml(refreshed)}`;
+      if (!data.trends?.length) { content.innerHTML = '<div class="empty">No trends in feed.</div>'; return; }
+      content.innerHTML = `<div class="grid">${data.trends.map(t => renderTrendCard(t, false)).join('')}</div>`;
+    }
+
+    function renderClient(data) {
+      const refreshed = data.refreshedAt ? new Date(data.refreshedAt).toLocaleString('en-GB') : '';
+      metaLine.innerHTML = `<strong>${data.relevantTrends}</strong> relevant trends (of ${data.totalTrends} scored) · for <strong>${escapeHtml(data.clientName)}</strong> · refreshed ${escapeHtml(refreshed)} · tone: ${escapeHtml(data.tone)}`;
+      if (!data.matches?.length) {
+        content.innerHTML = `<div class="empty">
+          0 trends scored ≥40 relevance for this client.<br/>
+          <span style="font-size:12px;">Either trends don't fit their niche right now, or refresh the global feed first.</span>
+        </div>`;
+        return;
+      }
+      content.innerHTML = `<div class="grid">${data.matches.map(t => renderTrendCard(t, true)).join('')}</div>`;
+    }
+
+    function renderTrendCard(t, perClient) {
+      const score = t.relevanceScore || 0;
+      const tier = score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low';
+      const ideas = perClient ? (t.copyIdeas || []) : [];
+      return `
+        <div class="trend ${tier}">
+          <div class="trend-header">
+            <div class="trend-title">${escapeHtml(t.title)}</div>
+            ${perClient ? `<span class="relevance-badge ${tier}">${score}/100</span>` : ''}
+          </div>
+          <div class="summary">${escapeHtml(t.summary || '')}</div>
+          <div class="pill-row">
+            ${t.category ? `<span class="pill cat">${escapeHtml(t.category)}</span>` : ''}
+            ${t.virality ? `<span class="pill viral-${t.virality}">${escapeHtml(t.virality)}</span>` : ''}
+            ${t.shelfLifeDays ? `<span class="pill shelf">${t.shelfLifeDays}d shelf</span>` : ''}
+          </div>
+          ${(t.nicheMatches||[]).length ? `<div class="section-label">Niches</div><div class="pill-row">${t.nicheMatches.map(n => `<span class="pill">${escapeHtml(n)}</span>`).join('')}</div>` : ''}
+          ${perClient && ideas.length ? `
+            <div class="section-label">Ready-to-post copy (${ideas.length})</div>
+            ${ideas.map(renderCopy).join('')}
+          ` : ''}
+          ${perClient && !ideas.length && !t.copyError ? `<div class="empty" style="padding:14px;font-size:12px;">No copy generated for this trend.</div>` : ''}
+          ${t.copyError ? `<div class="empty" style="padding:14px;font-size:12px;color:var(--err);">Copy error: ${escapeHtml(t.copyError)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function renderCopy(idea) {
+      const text = `${idea.hook || ''}\n\n${idea.body || ''}\n\n${idea.cta || ''}`.trim();
+      return `
+        <div class="copy-card">
+          <div class="angle-row">
+            <span class="angle-tag">${escapeHtml(idea.angle || 'angle')}</span>
+            <div style="display:flex;gap:6px;">
+              ${idea.format ? `<span class="format-tag">${escapeHtml(idea.format)}</span>` : ''}
+              ${idea.riskLevel ? `<span class="risk-tag ${idea.riskLevel}">${escapeHtml(idea.riskLevel)}</span>` : ''}
+            </div>
+          </div>
+          <div class="hook">${escapeHtml(idea.hook || '')}</div>
+          <div class="body">${escapeHtml(idea.body || '')}</div>
+          ${idea.cta ? `<div class="cta">→ ${escapeHtml(idea.cta)}</div>` : ''}
+          ${idea.whyItWorks ? `<div class="why">${escapeHtml(idea.whyItWorks)}</div>` : ''}
+          <div style="margin-top:8px;text-align:right;">
+            <button class="copy-btn" onclick='copyToClip(${JSON.stringify(text)})'>Copy text</button>
+          </div>
+        </div>
+      `;
+    }
+
+    window.copyToClip = (t) => {
+      navigator.clipboard.writeText(t).then(() => alert('Copied to clipboard'));
+    };
+
+    refreshBtn.addEventListener('click', async () => {
+      if (!confirm('Refresh global trend feed? Costs ~$0.30 + takes 60-90s.')) return;
+      refreshBtn.disabled = true; refreshBtn.innerHTML = '<span class="spinner"></span> Scanning…';
+      try {
+        const r = await fetch('/api/trend-jacking/refresh', { method:'POST' });
+        const j = await r.json();
+        if (!j.success) throw new Error(j.error);
+        alert(`Done — ${j.data.count} trends from ${j.data.sourceCount} articles.`);
+        load();
+      } catch (e) { alert('Failed: '+e.message); }
+      finally { refreshBtn.disabled = false; refreshBtn.innerHTML = '✨ Refresh trends'; }
+    });
+
+    generateBtn.addEventListener('click', async () => {
+      const cid = clientSelect.value;
+      if (!cid) return;
+      if (!confirm(`Generate trend-jack copy for ${cid}? Takes 60-120s, costs ~$0.20.`)) return;
+      generateBtn.disabled = true; generateBtn.innerHTML = '<span class="spinner"></span> Writing copy…';
+      try {
+        const r = await fetch(`/api/trend-jacking/${cid}/generate`, { method:'POST' });
+        const j = await r.json();
+        if (!j.success) throw new Error(j.error);
+        alert(`Done — ${j.data.relevantTrends} relevant trends with copy.`);
+        load();
+      } catch (e) { alert('Failed: '+e.message); }
+      finally { generateBtn.disabled = false; generateBtn.innerHTML = '🎯 Generate copy for client'; }
+    });
+
+    clientSelect.addEventListener('change', load);
+    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    loadClients().then(load);
+  </script>
+</body>
+</html>

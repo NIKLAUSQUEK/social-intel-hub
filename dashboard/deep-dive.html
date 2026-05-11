@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Deep Dive — Social Intel</title>
+  <style>
+    :root {
+      --bg:#0B1020; --panel:#141A2E; --panel-2:#1A2140;
+      --text:#E6E8EF; --muted:#8B92A8; --accent:#7C5CFF;
+      --ok:#4ADE80; --warn:#FBBF24; --err:#FF6B6B; --cyan:#22D3EE; --pink:#F472B6;
+      --line:rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:24px; font-family: ui-sans-serif, system-ui, 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+    h1 { margin:0; font-size:22px; font-weight:700; }
+    .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+    select, button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:13px; cursor:pointer; font-family:inherit; }
+    button.primary { background:var(--accent); border-color:var(--accent); font-weight:600; }
+    button:disabled { opacity:0.5; cursor:not-allowed; }
+    .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+    .tab-row { display:flex; gap:6px; margin:16px 0; border-bottom:1px solid var(--line); }
+    .tab { padding:8px 16px; background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; border-bottom:2px solid transparent; border-radius:0; }
+    .tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+    .tab:hover { color:var(--text); }
+
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:14px; }
+    .card h3 { margin:0 0 12px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; }
+
+    .stat-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:14px; }
+    .stat-card { background:var(--panel-2); padding:12px 14px; border-radius:8px; }
+    .stat-val { font-size:22px; font-weight:700; }
+    .stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-top:4px; }
+
+    .post-row { display:flex; justify-content:space-between; gap:12px; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px; margin-bottom:6px; align-items:flex-start; }
+    .post-row .caption { flex:1; font-size:13px; line-height:1.4; }
+    .post-row .meta { display:flex; flex-direction:column; align-items:flex-end; font-size:11px; color:var(--muted); white-space:nowrap; gap:2px; }
+    .post-row .meta strong { color:var(--text); font-size:13px; }
+    .post-row a { color:var(--accent); font-size:11px; }
+    .platform-pill { font-size:9px; padding:2px 6px; border-radius:4px; background:var(--panel); color:var(--muted); text-transform:uppercase; }
+
+    .topic-card { background:var(--panel-2); border-radius:10px; padding:14px 16px; margin-bottom:10px; border-left:3px solid var(--muted); }
+    .topic-card.double-down { border-left-color:var(--ok); }
+    .topic-card.maintain { border-left-color:var(--cyan); }
+    .topic-card.diversify-away { border-left-color:var(--err); }
+    .topic-card.experimental { border-left-color:var(--warn); }
+    .topic-name { font-weight:700; font-size:15px; margin-bottom:6px; }
+    .topic-stats { display:flex; gap:12px; font-size:11px; color:var(--muted); margin-bottom:8px; }
+    .topic-stats .v { color:var(--text); font-weight:600; }
+    .verdict-pill { display:inline-block; font-size:10px; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; }
+    .verdict-pill.double-down { background:rgba(74,222,128,0.18); color:var(--ok); }
+    .verdict-pill.maintain { background:rgba(34,211,238,0.15); color:var(--cyan); }
+    .verdict-pill.diversify-away { background:rgba(255,107,107,0.18); color:var(--err); }
+    .verdict-pill.experimental { background:rgba(251,191,36,0.18); color:var(--warn); }
+    .topic-rationale { font-size:12px; color:var(--muted); line-height:1.5; margin-top:6px; }
+    .next-ideas { margin-top:8px; padding:8px 10px; background:rgba(124,92,255,0.08); border-radius:4px; font-size:12px; }
+
+    .priority-card { display:grid; grid-template-columns:60px 1fr 200px; gap:14px; padding:14px; background:var(--panel-2); border-radius:10px; margin-bottom:10px; border-left:3px solid var(--muted); }
+    .priority-card.P0 { border-left-color:var(--err); }
+    .priority-card.P1 { border-left-color:var(--warn); }
+    .priority-card.P2 { border-left-color:var(--muted); }
+    .priority-tag { display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:18px; }
+    .priority-tag.P0 { color:var(--err); }
+    .priority-tag.P1 { color:var(--warn); }
+    .priority-tag.P2 { color:var(--muted); }
+    .priority-tag .label { font-size:9px; color:var(--muted); margin-top:2px; }
+    .comment-text { font-size:14px; line-height:1.5; margin-bottom:6px; }
+    .comment-meta { font-size:11px; color:var(--muted); margin-bottom:6px; }
+    .comment-reason { font-size:11px; color:var(--text); font-style:italic; padding:4px 8px; background:rgba(255,255,255,0.04); border-radius:4px; margin-bottom:8px; }
+    .draft-box { background:rgba(124,92,255,0.08); border:1px solid rgba(124,92,255,0.2); border-radius:6px; padding:10px 12px; font-size:13px; line-height:1.4; margin-top:6px; }
+    .draft-label { font-size:9px; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em; font-weight:700; margin-bottom:4px; }
+    .convert-box { background:rgba(74,222,128,0.06); border-left:2px solid var(--ok); padding:8px 10px; font-size:12px; margin-top:6px; border-radius:4px; }
+    .copy-btn { background:transparent; border:1px solid var(--line); color:var(--muted); padding:4px 10px; font-size:11px; border-radius:4px; cursor:pointer; }
+    .copy-btn:hover { color:var(--accent); border-color:var(--accent); }
+
+    .insight-box { background:rgba(124,92,255,0.06); border:1px solid rgba(124,92,255,0.2); border-radius:10px; padding:14px 16px; font-size:14px; line-height:1.5; margin-bottom:14px; font-weight:500; }
+
+    .empty { padding:50px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:12px; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(124,92,255,0.3); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>🔍 Client Deep Dive</h1>
+      <div class="sub">Top performers · topic verdicts · response inbox · all-in-one client view.</div>
+    </div>
+    <div class="controls">
+      <select id="clientSelect"></select>
+      <button class="primary" id="recomputeBtn">↻ Recompute all</button>
+    </div>
+  </header>
+
+  <div class="tab-row" id="tabRow">
+    <button class="tab active" data-tab="performance">📈 Performance</button>
+    <button class="tab" data-tab="topics">🎯 Topic verdicts</button>
+    <button class="tab" data-tab="inbox">💬 Response inbox</button>
+  </div>
+
+  <div id="content" class="empty">Loading…</div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const recomputeBtn = document.getElementById('recomputeBtn');
+    const tabRow = document.getElementById('tabRow');
+    const content = document.getElementById('content');
+    let currentTab = 'performance';
+    let perf = null, prio = null;
+
+    async function loadClients() {
+      const res = await fetch('/api/clients');
+      const json = await res.json();
+      const list = (json.data || json).filter(c => c.active !== false).sort((a,b) => a.name.localeCompare(b.name));
+      clientSelect.innerHTML = list.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      const url = new URLSearchParams(location.search).get('client');
+      if (url && list.some(c => c.id === url)) clientSelect.value = url;
+      load();
+    }
+
+    async function load() {
+      const cid = clientSelect.value;
+      if (!cid) return;
+      content.innerHTML = '<div class="empty"><span class="spinner"></span> Loading…</div>';
+      try {
+        const [pRes, qRes] = await Promise.all([
+          fetch(`/api/content-performance/${cid}`),
+          fetch(`/api/response-priority/${cid}`),
+        ]);
+        perf = pRes.ok ? (await pRes.json()).data : null;
+        prio = qRes.ok ? (await qRes.json()).data : null;
+        render();
+      } catch (err) {
+        content.innerHTML = `<div class="empty">Error: ${err.message}</div>`;
+      }
+    }
+
+    function render() {
+      if (currentTab === 'performance') renderPerformance();
+      else if (currentTab === 'topics') renderTopics();
+      else if (currentTab === 'inbox') renderInbox();
+    }
+
+    function renderPerformance() {
+      if (!perf) {
+        content.innerHTML = `<div class="empty">No performance data — click ↻ Recompute all (~$0.20).</div>`;
+        return;
+      }
+      const platforms = perf.byPlatform || {};
+      const fmts = perf.formatRanked || [];
+      content.innerHTML = `
+        <div class="card">
+          <h3>Snapshot</h3>
+          <div class="stat-row">
+            <div class="stat-card"><div class="stat-val">${perf.totalPosts}</div><div class="stat-label">posts analysed</div></div>
+            ${Object.entries(platforms).map(([p,s]) => `
+              <div class="stat-card">
+                <div class="stat-val">${s.count}</div>
+                <div class="stat-label">${escapeHtml(p)} · avg ${(s.totalViews/s.count).toFixed(0)} v</div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🏆 Top 10 performing posts</h3>
+          ${(perf.topPosts||[]).map(p => `
+            <div class="post-row">
+              <div class="caption">
+                <span class="platform-pill">${escapeHtml(p.platform)}</span>
+                <span style="color:var(--muted);font-size:11px;"> · ${escapeHtml(p.format||'')}</span>
+                <div style="margin-top:4px;">${escapeHtml(p.caption)}</div>
+                ${p.url ? `<a href="${escapeHtml(p.url)}" target="_blank">open →</a>` : ''}
+              </div>
+              <div class="meta">
+                <strong>${(p.views||0).toLocaleString()} views</strong>
+                <span>${p.engagementRate}% ER · ${(p.interactions||0).toLocaleString()} int.</span>
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <div class="card">
+          <h3>📉 Bottom 5 (review or drop)</h3>
+          ${(perf.bottomPosts||[]).map(p => `
+            <div class="post-row">
+              <div class="caption"><span class="platform-pill">${escapeHtml(p.platform)}</span> ${escapeHtml(p.caption)}</div>
+              <div class="meta"><strong>${(p.views||0).toLocaleString()} v</strong><span>${p.engagementRate}% ER</span></div>
+            </div>`).join('')}
+        </div>
+
+        <div class="card">
+          <h3>Format performance</h3>
+          ${fmts.map(f => `
+            <div class="post-row">
+              <div class="caption"><strong>${escapeHtml(f.format)}</strong> · ${f.count} posts</div>
+              <div class="meta"><strong>avg ${f.avgViews.toLocaleString()} v</strong><span>${f.avgER}% ER</span></div>
+            </div>`).join('')}
+        </div>
+      `;
+    }
+
+    function renderTopics() {
+      if (!perf?.topics?.topics?.length) {
+        content.innerHTML = `<div class="empty">No topic clustering yet — click ↻ Recompute all.</div>`;
+        return;
+      }
+      const t = perf.topics;
+      content.innerHTML = `
+        ${t.headlineInsight ? `<div class="insight-box">💡 ${escapeHtml(t.headlineInsight)}</div>` : ''}
+        ${t.topics.map(tp => `
+          <div class="topic-card ${tp.verdict}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div class="topic-name">${escapeHtml(tp.name)}</div>
+              <span class="verdict-pill ${tp.verdict}">${escapeHtml(tp.verdict||'').replace(/-/g,' ')}</span>
+            </div>
+            <div class="topic-stats">
+              <span>${tp.postCount} posts</span>
+              <span>avg <span class="v">${tp.avgViews?.toLocaleString()||0}</span> views</span>
+              <span><span class="v">${tp.avgER||0}%</span> ER</span>
+            </div>
+            <div class="topic-rationale">${escapeHtml(tp.rationale||'')}</div>
+            ${tp.nextIdeas?.length ? `<div class="next-ideas">
+              <strong style="color:var(--accent);">Next content ideas:</strong>
+              <ul style="margin:4px 0 0;padding-left:18px;">${tp.nextIdeas.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+            </div>` : ''}
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function renderInbox() {
+      if (!prio) {
+        content.innerHTML = `<div class="empty">No response queue yet — click ↻ Recompute all.</div>`;
+        return;
+      }
+      const c = prio.counts || {};
+      content.innerHTML = `
+        <div class="stat-row">
+          <div class="stat-card" style="border-left:3px solid var(--err);"><div class="stat-val">${c.P0||0}</div><div class="stat-label">P0 — Respond NOW</div></div>
+          <div class="stat-card" style="border-left:3px solid var(--warn);"><div class="stat-val">${c.P1||0}</div><div class="stat-label">P1 — Today</div></div>
+          <div class="stat-card" style="border-left:3px solid var(--muted);"><div class="stat-val">${c.P2||0}</div><div class="stat-label">P2 — When possible</div></div>
+        </div>
+        ${(prio.queue||[]).map(c => `
+          <div class="priority-card ${c.priority}">
+            <div class="priority-tag ${c.priority}">
+              ${c.priority}<span class="label">${c.priority==='P0'?'NOW':c.priority==='P1'?'TODAY':'LATER'}</span>
+            </div>
+            <div>
+              <div class="comment-text">"${escapeHtml(c.text)}"</div>
+              <div class="comment-meta">@${escapeHtml(c.author||'unknown')} · ${escapeHtml(c.platform||'')} · ${escapeHtml(c.intent||'')}</div>
+              ${c.reason ? `<div class="comment-reason">→ ${escapeHtml(c.reason)}</div>` : ''}
+              ${c.draftResponse ? `
+                <div class="draft-box">
+                  <div class="draft-label">Suggested reply</div>
+                  ${escapeHtml(c.draftResponse)}
+                  <div style="text-align:right;margin-top:6px;">
+                    <button class="copy-btn" onclick='copyTxt(${JSON.stringify(c.draftResponse)})'>Copy reply</button>
+                  </div>
+                </div>` : ''}
+              ${c.convertToContent ? `<div class="convert-box">🎬 <strong>Convert to content:</strong> ${escapeHtml(c.convertToContent)}</div>` : ''}
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+              <span class="platform-pill" style="background:rgba(74,222,128,0.1);color:var(--ok);">${escapeHtml(c.riskOfReply||'safe')}</span>
+              <span style="font-size:10px;color:var(--muted);">${escapeHtml(c.intentType||'')}</span>
+            </div>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    window.copyTxt = (t) => navigator.clipboard.writeText(t).then(()=>alert('Copied'));
+
+    tabRow.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+      currentTab = b.dataset.tab;
+      tabRow.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === currentTab));
+      render();
+    }));
+
+    recomputeBtn.addEventListener('click', async () => {
+      const cid = clientSelect.value;
+      if (!confirm(`Recompute Performance + Inbox for ${cid}? Takes ~60-90s, costs ~$0.30.`)) return;
+      recomputeBtn.disabled = true; recomputeBtn.innerHTML = '<span class="spinner"></span> Computing…';
+      try {
+        await Promise.all([
+          fetch(`/api/content-performance/${cid}/compute`, { method:'POST' }),
+          fetch(`/api/response-priority/${cid}/compute`, { method:'POST' }),
+        ]);
+        load();
+      } catch (e) { alert('Failed: '+e.message); }
+      finally { recomputeBtn.disabled = false; recomputeBtn.innerHTML = '↻ Recompute all'; }
+    });
+
+    clientSelect.addEventListener('change', load);
+    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    loadClients();
+  </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+/* Intelligence Layer Theme — imported by index.html */
+/* Do NOT modify existing CSS. This is additive only. */
+
+:root {
+  --intel-green: #00E5A0;
+  --intel-amber: #FFB547;
+  --intel-red: #FF5C5C;
+  --intel-purple: #A78BFA;
+  --intel-bg: rgba(255,255,255,0.02);
+  --intel-card-radius: 12px;
+  --intel-font: 'JetBrains Mono', 'DM Sans', monospace;
+}
+
+/* Intel tab cards */
+.intel-card {
+  background: var(--intel-bg);
+  border: 1px solid #E2E8F0;
+  border-radius: var(--intel-card-radius);
+  padding: 16px;
+  transition: box-shadow 0.2s;
+}
+.intel-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.intel-card--accent {
+  border-top: 3px solid var(--intel-purple);
+}
+
+/* Health ring */
+.health-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.health-ring svg {
+  transform: rotate(-90deg);
+}
+.health-ring__label {
+  position: absolute;
+  font-family: var(--intel-font);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+/* Performance bars */
+.perf-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #F1F5F9;
+  overflow: hidden;
+}
+.perf-bar__fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Hook type badges */
+.hook-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: var(--intel-font);
+  font-weight: 500;
+}
+
+/* Opportunity cards */
+.opp-card {
+  border-radius: var(--intel-card-radius);
+  padding: 16px;
+  border-left: 4px solid;
+  background: white;
+  margin-bottom: 12px;
+}
+.opp-card__title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.opp-card__action {
+  font-size: 12px;
+  font-family: var(--intel-font);
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+/* Sentiment colours */
+.sentiment-positive { color: var(--intel-green); }
+.sentiment-neutral { color: var(--intel-amber); }
+.sentiment-negative { color: var(--intel-red); }
+
+/* Intel tab navigation */
+.intel-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #F1F5F9;
+  padding-bottom: 0;
+}
+.intel-tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94A3B8;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.intel-tab:hover {
+  color: #475569;
+}
+.intel-tab--active {
+  color: #7C5CFC;
+  border-bottom-color: #7C5CFC;
+}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Agent — Social Intel</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141a2e;
+      --text: #e6e8ef;
+      --muted: #8b92a8;
+      --accent: #7c5cff;
+      --accent-warm: #ff6b6b;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    p { color: var(--muted); margin: 0 0 24px; font-size: 14px; line-height: 1.5; }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--muted);
+    }
+    .dot.ok { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    .dot.err { background: var(--accent-warm); }
+    .usage {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .usage strong { color: var(--text); font-weight: 500; }
+    .bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .bar > div {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    .hint code {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    #widget-container {
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .missing-cfg {
+      text-align: center;
+      padding: 20px;
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Social Intel — Voice Agent</h1>
+    <p>Ask about any client, weekly movers, or recent alerts. British English, brief answers.</p>
+
+    <div class="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Checking…</span>
+    </div>
+
+    <div class="usage" id="usageBox" hidden>
+      <div><strong id="usedMin">0</strong> of <strong id="capMin">60</strong> minutes used this month</div>
+      <div class="bar"><div id="usageBar" style="width: 0%"></div></div>
+    </div>
+
+    <div id="widget-container">
+      <div class="missing-cfg" id="missingCfg" hidden>
+        ElevenLabs agent ID not configured.<br/>
+        Add <code>VOICE_AGENT_ID</code> to <code>.env.local</code>.
+      </div>
+    </div>
+
+    <div class="hint">
+      Try: <em>"How's Daniel Sim doing?"</em> · <em>"Top movers this week?"</em> · <em>"Any alerts?"</em>
+    </div>
+  </div>
+
+  <!-- ElevenLabs widget script — loaded dynamically after config check -->
+  <script>
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const usageBox = document.getElementById('usageBox');
+    const usedMinEl = document.getElementById('usedMin');
+    const capMinEl = document.getElementById('capMin');
+    const usageBar = document.getElementById('usageBar');
+    const widgetContainer = document.getElementById('widget-container');
+    const missingCfg = document.getElementById('missingCfg');
+
+    function setStatus(kind, text) {
+      statusDot.className = 'dot ' + kind;
+      statusText.textContent = text;
+    }
+
+    async function init() {
+      try {
+        const res = await fetch('/api/voice/session/check');
+        if (!res.ok) throw new Error('session check failed');
+        const data = await res.json();
+
+        usageBox.hidden = false;
+        usedMinEl.textContent = data.usedMinutes.toFixed(1);
+        capMinEl.textContent = data.capMinutes;
+        usageBar.style.width = Math.min(100, (data.usedMinutes / data.capMinutes) * 100) + '%';
+
+        if (!data.allowed) {
+          setStatus('err', 'Monthly voice budget used up');
+          return;
+        }
+        if (data.usedMinutes / data.capMinutes > 0.8) {
+          setStatus('warn', `Budget nearly full (${data.remainingMinutes.toFixed(1)} min left)`);
+        } else {
+          setStatus('ok', 'Ready — click mic to talk');
+        }
+
+        loadAgent();
+      } catch (err) {
+        setStatus('err', 'API unreachable');
+        console.error(err);
+      }
+    }
+
+    async function loadAgent() {
+      // Fetch the agent ID from the server (keeps it out of client source)
+      let agentId;
+      try {
+        const cfg = await fetch('/api/voice/config').then(r => r.json());
+        agentId = cfg.agentId;
+      } catch {
+        missingCfg.hidden = false;
+        return;
+      }
+
+      if (!agentId) {
+        missingCfg.hidden = false;
+        return;
+      }
+
+      // Inject ElevenLabs widget
+      const widget = document.createElement('elevenlabs-convai');
+      widget.setAttribute('agent-id', agentId);
+      widgetContainer.appendChild(widget);
+
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
+      script.async = true;
+      script.type = 'text/javascript';
+      document.body.appendChild(script);
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TITAN.AI Social Intel — Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:            #0B1020;
+    --bg-2:          #0F1530;
+    --panel:         #141A2E;
+    --panel-2:       #1A2140;
+    --line:          rgba(255,255,255,0.08);
+    --text:          #E6E8EF;
+    --muted:         #8B92A8;
+    --dim:           #5B637A;
+    --accent:        #7C5CFF;
+    --accent-soft:   rgba(124,92,255,0.12);
+    --accent-glow:   rgba(124,92,255,0.35);
+    --ok:            #4ADE80;
+    --warn:          #FBBF24;
+    --err:           #FF6B6B;
+    --pink:          #F472B6;
+    --cyan:          #22D3EE;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+  }
+
+  /* ── Slide engine ─────────────────────────────── */
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 52px 72px 70px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.35s ease, transform 0.4s ease;
+    pointer-events: none;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ── Chrome: top bar + progress + nav ─────────── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: rgba(11,16,32,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    z-index: 50;
+  }
+  .brandmark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  .brandmark .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .brandmark .section-tag {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12px;
+    margin-left: 14px;
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .progress {
+    position: fixed;
+    top: 52px; left: 0; right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.04);
+    z-index: 49;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--cyan));
+    transition: width 0.35s ease;
+  }
+
+  .nav-btn {
+    position: fixed;
+    bottom: 18px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 51;
+    font-size: 18px;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { background: var(--panel-2); border-color: var(--accent); }
+  .nav-prev { right: 70px; }
+  .nav-next { right: 22px; }
+
+  .dots {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 51;
+  }
+  .dots button {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.14);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+  }
+  .dots button.active {
+    background: var(--accent);
+    width: 22px;
+    border-radius: 4px;
+  }
+
+  /* ── Typography ──────────────────────────────── */
+  .eyebrow {
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  h1, .h1 {
+    font-size: clamp(42px, 5.8vw, 84px);
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    line-height: 1.0;
+    margin-bottom: 20px;
+  }
+  h2, .h2 {
+    font-size: clamp(32px, 3.6vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+    margin-bottom: 18px;
+  }
+  h3, .h3 {
+    font-size: clamp(20px, 1.9vw, 26px);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  p.lead {
+    font-size: clamp(18px, 1.5vw, 22px);
+    color: var(--muted);
+    max-width: 820px;
+    line-height: 1.55;
+  }
+  p { color: var(--muted); max-width: 780px; }
+  .accent { color: var(--accent); }
+  .text-white { color: var(--text); }
+  .muted { color: var(--muted); }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Layout utilities ────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .stack { display: flex; flex-direction: column; gap: 18px; }
+  .row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .spacer-sm { height: 14px; }
+  .spacer-md { height: 28px; }
+  .spacer-lg { height: 48px; }
+  .center { text-align: center; }
+  .justify-center { display: flex; align-items: center; justify-content: center; flex: 1; }
+  .hero-col { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+  /* ── Cards & surfaces ────────────────────────── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  .card.accent { border-left: 3px solid var(--accent); }
+  .card.pink   { border-left: 3px solid var(--pink); }
+  .card.warn   { border-left: 3px solid var(--warn); }
+  .card.ok     { border-left: 3px solid var(--ok); }
+  .card-title  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; font-weight: 600; }
+  .stat        { font-size: clamp(32px, 3.4vw, 46px); font-weight: 800; letter-spacing: -0.03em; }
+  .stat-sub    { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid rgba(124,92,255,0.25);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .pill.ok   { background: rgba(74,222,128,0.1);  color: var(--ok);   border-color: rgba(74,222,128,0.25); }
+  .pill.warn { background: rgba(251,191,36,0.1);  color: var(--warn); border-color: rgba(251,191,36,0.25); }
+  .pill.muted{ background: rgba(255,255,255,0.04);color: var(--muted);border-color: var(--line); }
+  .pill.pink { background: rgba(244,114,182,0.1); color: var(--pink); border-color: rgba(244,114,182,0.25); }
+  .pill.cyan { background: rgba(34,211,238,0.1);  color: var(--cyan); border-color: rgba(34,211,238,0.25); }
+
+  /* ── Slide 1 — Cover ─────────────────────────── */
+  .cover {
+    justify-content: center;
+    background: radial-gradient(ellipse at 20% 30%, rgba(124,92,255,0.15), transparent 55%),
+                radial-gradient(ellipse at 80% 80%, rgba(34,211,238,0.08), transparent 55%);
+  }
+  .cover-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 52px;
+  }
+  .logo-wordmark {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    position: relative;
+  }
+  .logo-wordmark .big-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin: 0 2px;
+    vertical-align: baseline;
+    box-shadow: 0 0 18px var(--accent-glow);
+  }
+  .cover h1 {
+    font-size: clamp(54px, 7vw, 112px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    margin-bottom: 32px;
+  }
+  .cover h1 .hl { background: linear-gradient(135deg, var(--accent), var(--cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .cover .tagline {
+    font-size: clamp(22px, 2vw, 28px);
+    color: var(--muted);
+    font-weight: 500;
+    max-width: 740px;
+    line-height: 1.4;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 14px;
+    margin-top: 64px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── Slide — Problem ─────────────────────────── */
+  .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 30px; }
+  .pain-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pain-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 32px; height: 32px;
+    background: var(--accent-soft);
+    border-radius: 0 0 24px 0;
+  }
+  .pain-icon {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 20px;
+  }
+  .pain-title { font-weight: 700; margin-bottom: 6px; color: var(--text); font-size: 15px; }
+  .pain-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+  /* ── Solution block ──────────────────────────── */
+  .big-solution {
+    display: flex;
+    gap: 48px;
+    align-items: center;
+    flex: 1;
+  }
+  .big-solution .left { flex: 1.2; }
+  .big-solution .right { flex: 1; }
+  .solution-visual {
+    background: linear-gradient(135deg, var(--accent-soft), rgba(34,211,238,0.08));
+    border: 1px solid rgba(124,92,255,0.25);
+    border-radius: 16px;
+    padding: 36px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .solution-visual .spinner {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent), transparent 70%);
+    position: relative;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+  .solution-visual .middle-chip {
+    position: absolute;
+    background: var(--bg);
+    color: var(--text);
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+
+  /* ── Data flow diagram ───────────────────────── */
+  .flow-wrap {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 36px;
+    margin-top: 20px;
+  }
+  .flow-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr 80px 1fr;
+    gap: 0;
+    align-items: center;
+  }
+  .flow-col h4 { font-size: 12px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 12px; }
+  .flow-chip {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .flow-chip .icon { font-size: 18px; }
+  .flow-chip .sub { color: var(--muted); font-size: 11px; margin-left: auto; }
+  .flow-center {
+    background: linear-gradient(135deg, var(--accent), #5639d9);
+    color: white;
+    padding: 24px 18px;
+    border-radius: 16px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    box-shadow: 0 10px 40px var(--accent-glow);
+    position: relative;
+  }
+  .flow-center::before, .flow-center::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 10px; height: 10px;
+    border-top: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+  }
+  .flow-center::before { left: -50px; transform: translateY(-50%) rotate(45deg); }
+  .flow-center::after  { right: -50px; transform: translateY(-50%) rotate(45deg); }
+  .flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 22px;
+  }
+
+  /* ── Feature slides ──────────────────────────── */
+  .feature-hero {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 44px;
+    flex: 1;
+    align-items: center;
+  }
+  .feature-visual {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    min-height: 360px;
+    position: relative;
+    overflow: hidden;
+  }
+  .feat-list { list-style: none; padding: 0; }
+  .feat-list li {
+    padding: 10px 0 10px 28px;
+    position: relative;
+    color: var(--text);
+    font-size: 15px;
+    border-bottom: 1px solid var(--line);
+  }
+  .feat-list li:last-child { border-bottom: none; }
+  .feat-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .feat-list li small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+  /* Report mockup */
+  .mockup-report {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid var(--line);
+  }
+  .mockup-bar { height: 8px; background: var(--panel-2); border-radius: 2px; margin: 4px 0; }
+  .mockup-bar.accent { background: var(--accent); }
+  .mockup-bar.short { width: 60%; }
+  .mockup-card-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 12px; }
+  .mockup-card-grid > div { background: var(--panel-2); border-radius: 4px; height: 32px; }
+
+  /* Calendar mockup */
+  .cal-mock { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-cell { aspect-ratio: 1; background: var(--panel-2); border-radius: 4px; font-size: 9px; color: var(--muted); padding: 3px; }
+  .cal-cell.chip-tof { background: rgba(96,165,250,0.15); border-left: 2px solid #60a5fa; }
+  .cal-cell.chip-mof { background: rgba(251,191,36,0.15); border-left: 2px solid var(--warn); }
+  .cal-cell.chip-bof { background: rgba(74,222,128,0.15); border-left: 2px solid var(--ok); }
+  .cal-cell.chip-batch { background: var(--accent-soft); border-left: 2px solid var(--accent); }
+
+  /* Audience sentiment */
+  .sent-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; }
+  .sent-bar > div { height: 100%; }
+  .sent-legend { display: flex; gap: 12px; margin-top: 10px; font-size: 11px; color: var(--muted); }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+  /* Voice mock */
+  .voice-mock {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+    gap: 18px;
+  }
+  .voice-orb {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent), transparent 70%);
+    position: relative;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  .voice-orb::after {
+    content: '🎤';
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px;
+  }
+  .voice-phrase {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ── Results slide ───────────────────────────── */
+  .result-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .result-videos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .video-placeholder {
+    aspect-ratio: 16/10;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .video-placeholder:hover { border-color: var(--accent); }
+  .video-placeholder::before {
+    content: '▶';
+    font-size: 28px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    background: var(--accent-soft);
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .video-title { font-size: 13px; font-weight: 600; color: var(--text); }
+
+  /* ── Moat flywheel ───────────────────────────── */
+  .flywheel-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .flywheel {
+    position: relative;
+    width: 540px; height: 540px;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* ── Comparison table ────────────────────────── */
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    margin-top: 24px;
+  }
+  .cmp-table th, .cmp-table td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .cmp-table th { background: var(--panel-2); font-weight: 600; color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table td.us { background: rgba(124,92,255,0.05); font-weight: 600; color: var(--text); }
+  .check-yes { color: var(--ok); font-size: 16px; font-weight: 700; }
+  .check-no  { color: var(--err); font-size: 14px; }
+  .check-partial { color: var(--warn); font-size: 16px; }
+
+  /* ── Roadmap ─────────────────────────────────── */
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .roadmap-col {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    min-height: 440px;
+    display: flex;
+    flex-direction: column;
+  }
+  .roadmap-quarter { font-weight: 700; font-size: 14px; letter-spacing: 0.02em; margin-bottom: 4px; }
+  .roadmap-date { color: var(--muted); font-size: 11px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .roadmap-item {
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+  }
+  .roadmap-item.filled { background: var(--accent-soft); border-left: 2px solid var(--accent); color: var(--text); }
+  .roadmap-item.placeholder { color: var(--dim); border: 1px dashed var(--line); background: transparent; font-style: italic; }
+  .roadmap-item.blank { height: 42px; border: 1px dashed rgba(255,255,255,0.04); background: transparent; margin-bottom: 8px; }
+  .roadmap-icon { flex-shrink: 0; }
+
+  /* ── OMNI AI slide ───────────────────────────── */
+  .omni-hero {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 44px;
+    flex: 1;
+    align-items: center;
+  }
+  .omni-sources {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .omni-source {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+  }
+  .omni-source .ic { font-size: 22px; display: block; margin-bottom: 4px; }
+  .merger-viz {
+    background: linear-gradient(135deg, var(--accent-soft), rgba(34,211,238,0.08));
+    border: 1px solid rgba(124,92,255,0.2);
+    border-radius: 14px;
+    padding: 28px;
+    text-align: center;
+  }
+
+  /* ── Closing / CTA ──────────────────────────── */
+  .cta-slide {
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 50%, rgba(124,92,255,0.15), transparent 60%);
+  }
+  .cta-line {
+    font-size: clamp(38px, 4vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 28px;
+    max-width: 900px;
+  }
+  .cta-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 28px;
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    margin-top: 20px;
+    font-weight: 500;
+  }
+
+  /* ── Live demo slide ─────────────────────────── */
+  .demo-marker {
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 50%, rgba(34,211,238,0.12), transparent 60%);
+  }
+  .demo-beats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 28px;
+    max-width: 1100px;
+  }
+  .demo-beat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 12px;
+    text-align: center;
+  }
+  .demo-beat .num {
+    display: inline-flex;
+    width: 26px; height: 26px;
+    align-items: center; justify-content: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  /* ── Print / responsive ──────────────────────── */
+  @media print {
+    html, body { overflow: visible; height: auto; }
+    .topbar, .progress, .nav-btn, .dots { display: none !important; }
+    .slide {
+      position: relative !important;
+      opacity: 1 !important;
+      transform: none !important;
+      page-break-after: always;
+      height: 100vh;
+    }
+  }
+  @media (max-width: 900px) {
+    .slide { padding: 60px 24px 80px; }
+    .grid-2, .grid-3, .grid-4, .feature-hero, .big-solution, .omni-hero, .pain-grid, .result-stat-grid, .result-videos, .roadmap { grid-template-columns: 1fr !important; }
+    .flow-row { grid-template-columns: 1fr !important; gap: 24px; }
+    .flow-center::before, .flow-center::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top chrome -->
+<div class="topbar">
+  <div class="brandmark">
+    <span>TITAN<span class="dot"></span>AI</span>
+    <span class="section-tag" id="sectionTag">Pitch Deck</span>
+  </div>
+  <div class="counter" id="counter">01 / 17</div>
+</div>
+<div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="deck" id="deck">
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 01 — Cover                                  -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide cover" data-section="Intro">
+    <div class="hero-col">
+      <div class="cover-brand">
+        <span class="logo-wordmark">TITAN<span class="big-dot"></span>AI</span>
+        <span class="pill cyan">Social Intel</span>
+      </div>
+      <h1>Systemised<br/><span class="hl">content scaling</span><br/>for modern agencies.</h1>
+      <p class="tagline">We turn scattered social data into a 24/7 intelligence layer that writes reports, finds ideas, and plans content — so your team ships faster and charges more.</p>
+      <div class="cover-meta">
+        <span class="pill">36 clients live</span>
+        <span class="pill ok">✓ Production-grade</span>
+        <span class="pill muted">Q2 2026</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 02 — Problem                                -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="The Problem">
+    <div class="eyebrow">The problem</div>
+    <h2>Agencies are drowning in <span class="accent">content work,</span><br/>starving for <span class="accent">content insight.</span></h2>
+    <p class="lead">Every week, your team repeats the same six painful jobs for every single client. Manually.</p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">📊</div>
+        <div class="pain-title">Weekly reports eat 8+ hours</div>
+        <div class="pain-desc">Screenshots, spreadsheets, stitched-together decks. One client, one day gone.</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">💭</div>
+        <div class="pain-title">Content ideas dry up</div>
+        <div class="pain-desc">"What should we post this month?" Same answer every time, delivered three days late.</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🎯</div>
+        <div class="pain-title">No real competitor view</div>
+        <div class="pain-desc">Clients ask "how are we doing vs X?" You guess. You lose the retainer.</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🗣️</div>
+        <div class="pain-title">You never hear the audience</div>
+        <div class="pain-desc">500 comments a week per client, nobody reads them, insights die in the app.</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🔁</div>
+        <div class="pain-title">Can't scale junior staff</div>
+        <div class="pain-desc">Strategy lives in the founder's head. Every hire bottlenecks.</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">💸</div>
+        <div class="pain-title">Churn after 3 months</div>
+        <div class="pain-desc">Client sees posting but not strategy. Retainer drops. Pipeline restarts.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 03 — Solution                               -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="The Solution">
+    <div class="big-solution">
+      <div class="left">
+        <div class="eyebrow">The solution</div>
+        <h2>One platform.<br/>Every client. <span class="accent">Every week.</span><br/>Automatically.</h2>
+        <p class="lead">TITAN.AI Social Intel watches your clients' social accounts 24/7, reads every comment, tracks every competitor, and produces agency-grade deliverables while your team sleeps.</p>
+        <div class="spacer-md"></div>
+        <div class="row">
+          <span class="pill ok">Reports auto-generated</span>
+          <span class="pill">Audience voice decoded</span>
+          <span class="pill pink">Content plans on-tap</span>
+          <span class="pill cyan">Voice-activated</span>
+        </div>
+      </div>
+      <div class="right">
+        <div class="solution-visual">
+          <div class="spinner"></div>
+          <div class="middle-chip">Social Intel<br/><span class="muted" style="font-weight:500;font-size:11px;">working for you</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 04 — How it communicates (flow)            -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="How it works">
+    <div class="eyebrow">How updates flow</div>
+    <h2>Signals in. <span class="accent">Intelligence out.</span></h2>
+    <p class="lead">Your team and your clients interact through the tools they already use. We handle the hard work in the middle.</p>
+    <div class="flow-wrap">
+      <div class="flow-row">
+        <div class="flow-col">
+          <h4>Signals in</h4>
+          <div class="flow-chip"><span class="icon">📱</span> Telegram commands <span class="sub">on demand</span></div>
+          <div class="flow-chip"><span class="icon">🖥️</span> Dashboard clicks <span class="sub">anytime</span></div>
+          <div class="flow-chip"><span class="icon">🎤</span> Voice questions <span class="sub">hands-free</span></div>
+          <div class="flow-chip"><span class="icon">📧</span> Email triggers <span class="sub">weekly</span></div>
+          <div class="flow-chip"><span class="icon">📅</span> Auto-schedule <span class="sub">always-on</span></div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-col">
+          <div class="flow-center">
+            TITAN.AI<br/>Social Intel<br/>
+            <span style="font-size:11px;font-weight:500;opacity:0.8;">reads · thinks · writes</span>
+          </div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-col">
+          <h4>Intelligence out</h4>
+          <div class="flow-chip"><span class="icon">📄</span> Brand strategy report <span class="sub">PDF</span></div>
+          <div class="flow-chip"><span class="icon">🔔</span> Telegram alerts <span class="sub">real-time</span></div>
+          <div class="flow-chip"><span class="icon">📬</span> Email digests <span class="sub">Monday AM</span></div>
+          <div class="flow-chip"><span class="icon">📆</span> Content calendar <span class="sub">4 weeks</span></div>
+          <div class="flow-chip"><span class="icon">🎙️</span> Voice briefings <span class="sub">on demand</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="spacer-md"></div>
+    <p class="muted" style="font-size: 13px;">No apps to learn. No dashboards to train on. Every team member works in the tool they already open 40 times a day.</p>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 05 — Why built this way                     -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Why we built it this way">
+    <div class="eyebrow">Design principles</div>
+    <h2>Built like a team, <span class="accent">not a tool.</span></h2>
+    <p class="lead">Most "social media tools" make you do the work. We built ours to do the work for you, the way a senior analyst would.</p>
+    <div class="spacer-md"></div>
+    <div class="grid-3">
+      <div class="card accent">
+        <div class="card-title">Principle 01</div>
+        <h3>Start from the deliverable</h3>
+        <p>Every feature answers one question: "What is the client actually paying for?" If the output doesn't land on their desk as something they'd proudly show a board — we don't ship it.</p>
+      </div>
+      <div class="card pink">
+        <div class="card-title">Principle 02</div>
+        <h3>Meet people where they are</h3>
+        <p>Telegram, email, phone voice. Never ask an agency team to learn a new UI. Intelligence meets you inside WhatsApp-speed workflows.</p>
+      </div>
+      <div class="card warn">
+        <div class="card-title">Principle 03</div>
+        <h3>Never fail silently</h3>
+        <p>6-layer fallback: if the primary AI is down, four others step in automatically. If all AI fails, a cloud backup catches it. Zero blank reports. Ever.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 06 — Feature: Brand Strategy Report         -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Feature · Brand Report">
+    <div class="eyebrow">Feature · Brand Strategy Report</div>
+    <h2>McKinsey-grade reports.<br/><span class="accent">Written in 3 minutes.</span></h2>
+    <div class="spacer-md"></div>
+    <div class="feature-hero">
+      <div>
+        <ul class="feat-list">
+          <li>Executive summary + strategic imperative<small>One-sentence verdict. One-sentence risk.</small></li>
+          <li>Brand identity + archetype + consistency score<small>Audit the brand like a consultant would.</small></li>
+          <li>Target audience — primary + secondary ICP<small>With real pain points from actual comments.</small></li>
+          <li>Competitor battlecards (one per rival)<small>Size gap · strengths · exploitable weaknesses · how to beat them.</small></li>
+          <li>Strategic roadmap: 30d · 90d · 12 months<small>Priorities, owners, success metrics.</small></li>
+          <li>Content calendar seeds + validation pass<small>Second AI fact-checks the first. Confidence scored.</small></li>
+        </ul>
+        <div class="spacer-md"></div>
+        <span class="pill ok">Exported as branded PDF</span>
+      </div>
+      <div class="feature-visual">
+        <div class="mockup-report">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:700;color:var(--accent);">BRAND STRATEGY REPORT</div>
+            <div style="font-size:10px;color:var(--muted);">High confidence ✓</div>
+          </div>
+          <div class="mockup-bar accent"></div>
+          <div class="mockup-bar short"></div>
+          <div class="mockup-bar short"></div>
+          <div class="spacer-sm"></div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Competitor Battlecards</div>
+          <div class="mockup-card-grid">
+            <div></div><div></div><div></div>
+          </div>
+          <div class="spacer-sm"></div>
+          <div class="mockup-bar"></div>
+          <div class="mockup-bar short"></div>
+          <div style="margin-top:14px;padding:8px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:4px;font-size:11px;color:var(--text);font-weight:500;">
+            "60-day window to category leadership before competitor eclipses."
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 07 — Feature: Audience Voice                -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Feature · Audience Voice">
+    <div class="eyebrow">Feature · Audience Voice</div>
+    <h2>Stop guessing.<br/><span class="accent">Your audience is telling you.</span></h2>
+    <div class="spacer-md"></div>
+    <div class="feature-hero">
+      <div>
+        <p class="lead" style="margin-bottom:20px;">We read every comment on every post, sort them by intent, and hand your team a stack of ready-to-film content ideas — powered by what your audience literally asked for.</p>
+        <ul class="feat-list">
+          <li>Sentiment split: positive · neutral · negative · mixed</li>
+          <li>Top questions they keep asking<small>→ FAQ video queue, auto-generated.</small></li>
+          <li>Fan requests: "do a video on X"<small>→ MOF content ideas, ranked by demand.</small></li>
+          <li>Hater comments + recommended responses<small>→ Contrarian content goldmine.</small></li>
+          <li>Content briefs with hook, format, why it works</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">AUDIENCE SENTIMENT · 487 comments</div>
+        <div class="sent-bar">
+          <div style="width:62%;background:var(--ok);"></div>
+          <div style="width:28%;background:var(--muted);"></div>
+          <div style="width:10%;background:var(--err);"></div>
+        </div>
+        <div class="sent-legend">
+          <span><span class="legend-dot" style="background:var(--ok);"></span>62% positive</span>
+          <span><span class="legend-dot" style="background:var(--muted);"></span>28% neutral</span>
+          <span><span class="legend-dot" style="background:var(--err);"></span>10% negative</span>
+        </div>
+        <div class="spacer-md"></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">CONTENT IDEA · fan_request · 23 comments</div>
+        <div style="background:var(--panel-2);border-radius:8px;padding:14px;border-left:3px solid var(--accent);">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">The realistic £10k property path</div>
+          <div style="font-style:italic;color:var(--muted);font-size:12px;">"Most people think property starts at £100k. It doesn't."</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px;">Reel · positive · IG+TikTok</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 08 — Feature: Content Calendar              -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Feature · Calendar">
+    <div class="eyebrow">Feature · Content Calendar</div>
+    <h2>4-week content plans.<br/><span class="accent">Built in minutes. Not meetings.</span></h2>
+    <div class="spacer-md"></div>
+    <div class="feature-hero">
+      <div>
+        <ul class="feat-list">
+          <li>Funnel-balanced mix: 60% TOF · 30% MOF · 10% BOF<small>Awareness, consideration, conversion — balanced automatically.</small></li>
+          <li>Batch filming days proposed<small>Film once a Saturday, ship content all month.</small></li>
+          <li>Series detection + continuation<small>Top performers get extended, not ignored.</small></li>
+          <li>Hook + framework per post<small>Pattern Interrupt × Problem-Agitate-Solution. Named frameworks.</small></li>
+          <li>Platform-specific views<small>Switch: IG calendar → TikTok calendar → LinkedIn calendar.</small></li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">APRIL 2026 · ALL PLATFORMS</div>
+        <div class="cal-mock">
+          <div class="cal-cell">M</div><div class="cal-cell">T</div><div class="cal-cell">W</div><div class="cal-cell">T</div><div class="cal-cell">F</div><div class="cal-cell">S</div><div class="cal-cell">S</div>
+          <div class="cal-cell chip-tof">1</div><div class="cal-cell">2</div><div class="cal-cell chip-mof">3</div><div class="cal-cell">4</div><div class="cal-cell chip-tof">5</div><div class="cal-cell chip-batch">6</div><div class="cal-cell">7</div>
+          <div class="cal-cell chip-tof">8</div><div class="cal-cell">9</div><div class="cal-cell chip-mof">10</div><div class="cal-cell">11</div><div class="cal-cell chip-bof">12</div><div class="cal-cell">13</div><div class="cal-cell">14</div>
+          <div class="cal-cell chip-tof">15</div><div class="cal-cell">16</div><div class="cal-cell chip-tof">17</div><div class="cal-cell chip-mof">18</div><div class="cal-cell">19</div><div class="cal-cell chip-batch">20</div><div class="cal-cell">21</div>
+        </div>
+        <div class="sent-legend" style="margin-top:12px;">
+          <span><span class="legend-dot" style="background:#60a5fa;"></span>TOF</span>
+          <span><span class="legend-dot" style="background:var(--warn);"></span>MOF</span>
+          <span><span class="legend-dot" style="background:var(--ok);"></span>BOF</span>
+          <span><span class="legend-dot" style="background:var(--accent);"></span>Film day</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 09 — Feature: Voice Agent                   -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Feature · Voice Agent">
+    <div class="eyebrow">Feature · Voice Agent</div>
+    <h2>Just ask.<br/><span class="accent">Out loud.</span></h2>
+    <div class="spacer-md"></div>
+    <div class="feature-hero">
+      <div>
+        <p class="lead" style="margin-bottom:20px;">Get client updates while you're driving, walking, or pitching. One question, spoken — instant answer, in your own voice-trained agent.</p>
+        <ul class="feat-list">
+          <li>"How's [client] doing this week?"</li>
+          <li>"What are fans asking about?"</li>
+          <li>"Top movers this week?"</li>
+          <li>"Any alerts I should know about?"</li>
+          <li>"Generate a brand report for [client]"</li>
+        </ul>
+        <div class="spacer-md"></div>
+        <span class="pill pink">ElevenLabs-powered · Sub-second response</span>
+      </div>
+      <div class="feature-visual voice-mock">
+        <div class="voice-orb"></div>
+        <div class="voice-phrase">"How's Daniel Sim doing?"</div>
+        <div style="font-size:12px;color:var(--accent);font-weight:600;">↓ responding in &lt;1s</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 10 — Live demo marker                       -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide demo-marker" data-section="Live Demo">
+    <div class="hero-col center" style="align-items:center;">
+      <div class="eyebrow">Live demo</div>
+      <h1 style="font-size:clamp(54px,6vw,96px);">Let's see it working.</h1>
+      <p class="lead center" style="margin: 20px auto 0;">8 minutes through the platform. No slides. No talking points. Just the product running live on 36 real clients.</p>
+      <div class="demo-beats">
+        <div class="demo-beat"><div class="num">1</div>Dashboard — 36 clients live</div>
+        <div class="demo-beat"><div class="num">2</div>Open a Brand Report (Opus live-generated)</div>
+        <div class="demo-beat"><div class="num">3</div>Audience Voice + content ideas</div>
+        <div class="demo-beat"><div class="num">4</div>Content calendar + batch filming</div>
+        <div class="demo-beat"><div class="num">5</div>Voice agent hands-free query</div>
+        <div class="demo-beat"><div class="num">6</div>Notifications centre (live)</div>
+        <div class="demo-beat"><div class="num">7</div>Competitor battlecard drill-in</div>
+        <div class="demo-beat"><div class="num">8</div>Export & deliver</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 11 — Results + videos                       -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Results">
+    <div class="eyebrow">Client results</div>
+    <h2>The proof is in the <span class="accent">posts that landed.</span></h2>
+    <p class="lead">Anonymised client outcomes from the first 6 months.</p>
+
+    <div class="spacer-md"></div>
+
+    <div class="result-stat-grid">
+      <div class="card accent">
+        <div class="card-title">Time saved per report</div>
+        <div class="stat">8h → 3min</div>
+        <div class="stat-sub">Per client, per week</div>
+      </div>
+      <div class="card ok">
+        <div class="card-title">Content idea throughput</div>
+        <div class="stat">~10×</div>
+        <div class="stat-sub">Ideas surfaced per month</div>
+      </div>
+      <div class="card pink">
+        <div class="card-title">Zero-downtime streak</div>
+        <div class="stat">100%</div>
+        <div class="stat-sub">6-tier fallback proven live</div>
+      </div>
+      <div class="card warn">
+        <div class="card-title">Avg client uplift</div>
+        <div class="stat">+48%</div>
+        <div class="stat-sub">Engagement, first 90 days</div>
+      </div>
+    </div>
+
+    <div class="eyebrow" style="margin-top:20px;">Video proof · Click to play</div>
+    <div class="result-videos">
+      <div class="video-placeholder">
+        <div class="video-title">SG political creator</div>
+        <div class="video-label">+8.6K TikTok followers in 90 days</div>
+      </div>
+      <div class="video-placeholder">
+        <div class="video-title">UK property mentor</div>
+        <div class="video-label">3× engagement via audience-voice strategy</div>
+      </div>
+      <div class="video-placeholder">
+        <div class="video-title">Wellness consultant</div>
+        <div class="video-label">Full content system in 2 weeks</div>
+      </div>
+      <div class="video-placeholder">
+        <div class="video-title">Fractional agency</div>
+        <div class="video-label">Reporting time cut 88%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 12 — Unit economics                         -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Unit Economics">
+    <div class="eyebrow">Unit economics</div>
+    <h2>Priced for <span class="accent">agency margins.</span><br/>Built for agency scale.</h2>
+    <p class="lead">Software costs stay flat as clients compound. Every new client is profit.</p>
+    <div class="spacer-md"></div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">Starter tier</div>
+        <div class="stat">5 clients</div>
+        <div class="stat-sub">Weekly reports · Audience voice · Alerts · Email digest</div>
+      </div>
+      <div class="card accent">
+        <div class="card-title">Growth tier · Most popular</div>
+        <div class="stat">6–25 clients</div>
+        <div class="stat-sub">+ Brand reports · Content calendar · Voice agent</div>
+      </div>
+      <div class="card pink">
+        <div class="card-title">Agency tier</div>
+        <div class="stat">25+ clients</div>
+        <div class="stat-sub">+ Custom framework library · Compliance cron · White-label PDFs</div>
+      </div>
+    </div>
+    <div class="spacer-md"></div>
+    <div class="card warn">
+      <div class="card-title">Margin profile</div>
+      <div style="display:flex;gap:40px;align-items:center;flex-wrap:wrap;">
+        <div>
+          <div class="stat" style="font-size:32px;">~85–95%</div>
+          <div class="stat-sub">gross margin at scale</div>
+        </div>
+        <div style="flex:1;min-width:260px;">
+          <p style="font-size:13px;">Our cost per client per month sits in the low tens of dollars across all AI providers, scrape APIs, and voice synthesis combined — regardless of pricing tier. Pricing power comes from the deliverable quality, not compute.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 13 — Moat / flywheel                        -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Moat">
+    <div class="eyebrow">Why this compounds</div>
+    <h2>Every client makes <span class="accent">every other client</span> smarter.</h2>
+    <p class="lead">Shared pattern library. Cross-client trend detection. Brand voice IP that deepens monthly. We built the flywheel, not just the tool.</p>
+    <div class="flywheel-wrap">
+      <svg class="flywheel" viewBox="0 0 540 540" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="core" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#7C5CFF" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7C5CFF"/>
+            <stop offset="100%" stop-color="#22D3EE"/>
+          </linearGradient>
+          <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#7C5CFF"/>
+          </marker>
+        </defs>
+        <!-- Circle guide -->
+        <circle cx="270" cy="270" r="220" fill="url(#core)"/>
+        <circle cx="270" cy="270" r="200" fill="none" stroke="rgba(124,92,255,0.2)" stroke-dasharray="4 6"/>
+        <!-- Center badge -->
+        <circle cx="270" cy="270" r="68" fill="#141A2E" stroke="#7C5CFF" stroke-width="2"/>
+        <text x="270" y="262" text-anchor="middle" fill="#E6E8EF" font-family="Inter" font-weight="800" font-size="18">TITAN.AI</text>
+        <text x="270" y="284" text-anchor="middle" fill="#8B92A8" font-family="Inter" font-weight="500" font-size="11">Social Intel</text>
+
+        <!-- 4 nodes at 45/135/225/315 -->
+        <!-- Top: More clients -->
+        <g>
+          <rect x="195" y="14" width="150" height="58" rx="10" fill="#141A2E" stroke="#7C5CFF" stroke-width="1"/>
+          <text x="270" y="38" text-anchor="middle" fill="#E6E8EF" font-weight="700" font-size="13">More clients</text>
+          <text x="270" y="56" text-anchor="middle" fill="#8B92A8" font-size="10">36 → 100 → 500</text>
+        </g>
+        <!-- Right: More data -->
+        <g>
+          <rect x="400" y="240" width="125" height="58" rx="10" fill="#141A2E" stroke="#7C5CFF" stroke-width="1"/>
+          <text x="462" y="264" text-anchor="middle" fill="#E6E8EF" font-weight="700" font-size="13">More data</text>
+          <text x="462" y="282" text-anchor="middle" fill="#8B92A8" font-size="10">Posts · comments · voice</text>
+        </g>
+        <!-- Bottom: Better output -->
+        <g>
+          <rect x="190" y="468" width="160" height="58" rx="10" fill="#141A2E" stroke="#7C5CFF" stroke-width="1"/>
+          <text x="270" y="492" text-anchor="middle" fill="#E6E8EF" font-weight="700" font-size="13">Better deliverables</text>
+          <text x="270" y="510" text-anchor="middle" fill="#8B92A8" font-size="10">Smarter reports + briefs</text>
+        </g>
+        <!-- Left: Outcomes -->
+        <g>
+          <rect x="15" y="240" width="125" height="58" rx="10" fill="#141A2E" stroke="#7C5CFF" stroke-width="1"/>
+          <text x="77" y="264" text-anchor="middle" fill="#E6E8EF" font-weight="700" font-size="13">Client wins</text>
+          <text x="77" y="282" text-anchor="middle" fill="#8B92A8" font-size="10">Growth + retention</text>
+        </g>
+        <!-- Curved arrows between (approximated) -->
+        <path d="M 350 56  A 220 220 0 0 1 484 240" fill="none" stroke="url(#edge)" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 484 300 A 220 220 0 0 1 350 484" fill="none" stroke="url(#edge)" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 190 484 A 220 220 0 0 1 56 300"  fill="none" stroke="url(#edge)" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 56 240  A 220 220 0 0 1 190 56"  fill="none" stroke="url(#edge)" stroke-width="2" marker-end="url(#arr)"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 14 — Comparison table                       -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Vs competition">
+    <div class="eyebrow">Vs competition</div>
+    <h2>Not another <span class="accent">scheduler.</span><br/>Not another <span class="accent">dashboard.</span></h2>
+    <p class="lead">Existing tools schedule posts. We decide what should be posted — and why.</p>
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th class="center">Buffer / Later / Hootsuite</th>
+          <th class="center">Sprout Social / Brandwatch</th>
+          <th class="center" style="background:var(--accent);color:#fff;">TITAN.AI Social Intel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Schedule posts</td><td class="center check-yes">✓</td><td class="center check-yes">✓</td><td class="center us check-yes">✓</td></tr>
+        <tr><td>Basic engagement analytics</td><td class="center check-yes">✓</td><td class="center check-yes">✓</td><td class="center us check-yes">✓</td></tr>
+        <tr><td>Competitor scraping + battlecards</td><td class="center check-no">—</td><td class="center check-partial">partial</td><td class="center us check-yes">✓</td></tr>
+        <tr><td>Audience comment intelligence</td><td class="center check-no">—</td><td class="center check-partial">keywords only</td><td class="center us check-yes">✓ intent + ideas</td></tr>
+        <tr><td>McKinsey-grade brand reports</td><td class="center check-no">—</td><td class="center check-no">—</td><td class="center us check-yes">✓ Opus 4 + validator</td></tr>
+        <tr><td>AI content calendar with frameworks</td><td class="center check-no">—</td><td class="center check-no">—</td><td class="center us check-yes">✓</td></tr>
+        <tr><td>Voice agent for hands-free briefings</td><td class="center check-no">—</td><td class="center check-no">—</td><td class="center us check-yes">✓</td></tr>
+        <tr><td>Delivery via Telegram + Email + Voice</td><td class="center check-partial">partial</td><td class="center check-partial">email only</td><td class="center us check-yes">✓ all channels</td></tr>
+        <tr><td>6-tier AI fallback reliability</td><td class="center check-no">—</td><td class="center check-no">—</td><td class="center us check-yes">✓</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 15 — OMNI AI (other project)                -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="OMNI AI">
+    <div class="eyebrow">Sibling product · Merging in 1-2 months</div>
+    <h2>Meet <span class="accent">OMNI AI.</span><br/>The upstream radar.</h2>
+    <p class="lead">Social Intel is downstream (client content). OMNI AI is upstream (trend detection). Together: see what's coming, then act on it for every client automatically.</p>
+    <div class="spacer-md"></div>
+    <div class="omni-hero">
+      <div>
+        <h3 class="accent">What it watches</h3>
+        <div class="omni-sources">
+          <div class="omni-source"><span class="ic">📈</span>Google Trends</div>
+          <div class="omni-source"><span class="ic">💬</span>Reddit signals</div>
+          <div class="omni-source"><span class="ic">🔍</span>Search queries</div>
+          <div class="omni-source"><span class="ic">📰</span>News cycle</div>
+          <div class="omni-source"><span class="ic">🐦</span>X / Twitter pulse</div>
+          <div class="omni-source"><span class="ic">🎬</span>Streaming drops</div>
+        </div>
+        <div class="spacer-md"></div>
+        <h3>Why it matters</h3>
+        <p>Social Intel tells you <span class="accent text-white">what your audience asked</span>. OMNI AI tells you <span class="accent text-white">what the whole internet is about to ask</span> — 48 hours early. Your content team rides the wave; you don't chase it.</p>
+        <div class="spacer-md"></div>
+        <span class="pill pink">MVP stage</span>
+        <span class="pill">Merging Q3 2026</span>
+      </div>
+      <div>
+        <div class="merger-viz">
+          <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text);">Combined platform · Q3 2026</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <span class="pill cyan" style="flex:1;justify-content:center;">OMNI AI</span>
+            <span style="color:var(--accent);font-size:18px;">+</span>
+            <span class="pill" style="flex:1;justify-content:center;">Social Intel</span>
+          </div>
+          <div style="border-top:1px solid var(--line); margin: 16px 0;"></div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.55;">
+            Upstream trend detection meets downstream content execution. One platform. One predictive engine. One fee.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 16 — Roadmap                                -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide" data-section="Roadmap">
+    <div class="eyebrow">Roadmap · 4 quarters</div>
+    <h2>Where we're <span class="accent">going next.</span></h2>
+    <p class="lead">Shipped (purple) · actively building (dashed) · open to agency input (blank).</p>
+    <div class="roadmap">
+      <!-- Q3 2026 -->
+      <div class="roadmap-col">
+        <div class="roadmap-quarter">Q3 2026</div>
+        <div class="roadmap-date">Now shipping</div>
+        <div class="roadmap-item filled"><span class="roadmap-icon">✓</span><span>Brand voice compliance (monthly cron, auto-flag drift)</span></div>
+        <div class="roadmap-item filled"><span class="roadmap-icon">✓</span><span>Meta Graph API — free IG scraping for business accounts</span></div>
+        <div class="roadmap-item placeholder"><span>placeholder · agency feature #1</span></div>
+        <div class="roadmap-item blank"></div>
+      </div>
+      <!-- Q4 2026 -->
+      <div class="roadmap-col">
+        <div class="roadmap-quarter">Q4 2026</div>
+        <div class="roadmap-date">Next horizon</div>
+        <div class="roadmap-item filled"><span class="roadmap-icon">◆</span><span>OMNI AI merge — upstream trend radar integrated</span></div>
+        <div class="roadmap-item filled"><span class="roadmap-icon">◆</span><span>Voice Agent Phase 2 — prospect-qualifier for titanai.space</span></div>
+        <div class="roadmap-item placeholder"><span>placeholder · enterprise integration</span></div>
+        <div class="roadmap-item placeholder"><span>placeholder · team workflow</span></div>
+      </div>
+      <!-- Q1 2027 -->
+      <div class="roadmap-col">
+        <div class="roadmap-quarter">Q1 2027</div>
+        <div class="roadmap-date">Horizon 3</div>
+        <div class="roadmap-item placeholder"><span>placeholder · regional expansion</span></div>
+        <div class="roadmap-item placeholder"><span>placeholder · data partnerships</span></div>
+        <div class="roadmap-item blank"></div>
+        <div class="roadmap-item blank"></div>
+      </div>
+      <!-- Q2 2027 -->
+      <div class="roadmap-col">
+        <div class="roadmap-quarter">Q2 2027</div>
+        <div class="roadmap-date">Horizon 4</div>
+        <div class="roadmap-item placeholder"><span>placeholder · bold bet</span></div>
+        <div class="roadmap-item blank"></div>
+        <div class="roadmap-item blank"></div>
+        <div class="roadmap-item blank"></div>
+      </div>
+    </div>
+    <div class="spacer-md"></div>
+    <p class="muted center" style="font-size: 13px;">Your agency shapes our quarterly roadmap. Early partners have direct input on Q4-Q2 priorities.</p>
+  </section>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- 17 — Closing / CTA                          -->
+  <!-- ─────────────────────────────────────────── -->
+  <section class="slide cta-slide" data-section="Next Steps">
+    <div class="hero-col center" style="align-items:center;">
+      <div class="eyebrow">Let's talk</div>
+      <div class="cta-line">Your agency was built on <span class="accent">insight.</span><br/>We built the system that produces it <span class="accent">on tap.</span></div>
+      <p class="lead center" style="margin: 0 auto;">30-minute pilot scope call · live platform walkthrough on your clients · onboarding within 2 weeks.</p>
+      <div class="cta-contact">
+        <div style="text-align:left;">
+          <div style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;">Contact</div>
+          <div style="font-weight:700;font-size:18px;margin-top:4px;">future@titanai.space</div>
+        </div>
+        <div style="width:1px;height:44px;background:var(--line);"></div>
+        <div style="text-align:left;">
+          <div style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;">Founder</div>
+          <div style="font-weight:700;font-size:18px;margin-top:4px;">Niklaus Quek</div>
+        </div>
+      </div>
+      <div style="margin-top: 40px; display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <span class="pill muted">TITAN.AI · UK Co. 16627057</span>
+        <span class="pill muted">SG · UEN 202523330N</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Navigation -->
+<button class="nav-btn nav-prev" id="prevBtn" aria-label="Previous">‹</button>
+<button class="nav-btn nav-next" id="nextBtn" aria-label="Next">›</button>
+<div class="dots" id="dots"></div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  const sectionTag = document.getElementById('sectionTag');
+  const progressFill = document.getElementById('progressFill');
+  let current = 0;
+
+  // Build dots
+  slides.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    b.addEventListener('click', () => go(i));
+    dotsWrap.appendChild(b);
+  });
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    dotsWrap.querySelectorAll('button').forEach((b, i) => b.classList.toggle('active', i === current));
+    counter.textContent = pad(current + 1) + ' / ' + pad(slides.length);
+    sectionTag.textContent = slides[current].dataset.section || '';
+    progressFill.style.width = ((current + 1) / slides.length * 100) + '%';
+    // Update URL hash for deep-linking
+    history.replaceState(null, '', '#s' + (current + 1));
+  }
+
+  function go(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    render();
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => go(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => go(current + 1));
+
+  // Keyboard
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(current + 1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
+    if (e.key === 'Home') { e.preventDefault(); go(0); }
+    if (e.key === 'End')  { e.preventDefault(); go(slides.length - 1); }
+  });
+
+  // Swipe on mobile
+  let tx = 0;
+  window.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  window.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (dx > 60)  go(current - 1);
+    if (dx < -60) go(current + 1);
+  }, { passive: true });
+
+  // Deep-link from hash
+  const m = location.hash.match(/^#s(\d+)$/);
+  if (m) current = Math.max(0, Math.min(slides.length - 1, parseInt(m[1]) - 1));
+
+  render();
+</script>
+</body>
+</html>

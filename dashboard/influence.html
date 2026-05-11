@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Influence Network — Social Intel</title>
+  <style>
+    :root {
+      --bg:#0B1020; --panel:#141A2E; --panel-2:#1A2140;
+      --text:#E6E8EF; --muted:#8B92A8; --accent:#7C5CFF;
+      --ok:#4ADE80; --warn:#FBBF24; --err:#FF6B6B; --cyan:#22D3EE; --pink:#F472B6;
+      --line:rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px;
+      font-family: ui-sans-serif, system-ui, 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    header {
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:16px; flex-wrap:wrap; margin-bottom:20px;
+    }
+    h1 { margin:0; font-size:22px; font-weight:700; }
+    .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+    .meta { color:var(--muted); font-size:12px; margin-top:4px; }
+    select, button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:13px; cursor:pointer; font-family:inherit; }
+    button.primary { background:var(--accent); border-color:var(--accent); font-weight:600; }
+    button:disabled { opacity:0.5; cursor:not-allowed; }
+    .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+    .layout { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:960px) { .layout { grid-template-columns:1fr; } }
+
+    .card {
+      background:var(--panel); border:1px solid var(--line);
+      border-radius:12px; padding:18px; margin-bottom:14px;
+    }
+    .card h3 {
+      margin:0 0 10px; font-size:12px; font-weight:600; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.08em;
+    }
+
+    .orbit-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; }
+    .orbit-card {
+      background:var(--panel-2); border:1px solid var(--line);
+      border-radius:10px; padding:12px 14px;
+      border-left:3px solid var(--accent);
+    }
+    .orbit-card.role-thought-leader { border-left-color: var(--warn); }
+    .orbit-card.role-collaborator   { border-left-color: var(--ok); }
+    .orbit-card.role-peer           { border-left-color: var(--cyan); }
+    .orbit-card.role-fan-leader     { border-left-color: var(--pink); }
+    .orbit-card.role-brand-sponsor  { border-left-color: var(--accent); }
+    .orbit-card.role-unclear        { border-left-color: var(--muted); }
+
+    .orbit-header { display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px; }
+    .orbit-name { font-weight:700; font-size:14px; }
+    .role-pill {
+      font-size:9px; padding:2px 7px; border-radius:4px;
+      text-transform:uppercase; letter-spacing:0.05em; font-weight:700; white-space:nowrap;
+    }
+    .role-thought-leader .role-pill { background:rgba(251,191,36,0.14); color:var(--warn); }
+    .role-collaborator .role-pill   { background:rgba(74,222,128,0.14); color:var(--ok); }
+    .role-peer .role-pill           { background:rgba(34,211,238,0.14); color:var(--cyan); }
+    .role-fan-leader .role-pill     { background:rgba(244,114,182,0.14); color:var(--pink); }
+    .role-brand-sponsor .role-pill  { background:rgba(124,92,255,0.14); color:var(--accent); }
+    .role-unclear .role-pill        { background:rgba(255,255,255,0.05); color:var(--muted); }
+
+    .orbit-signal { font-size:12px; color:var(--muted); line-height:1.4; margin-top:4px; }
+    .orbit-action {
+      font-size:12px; color:var(--text); margin-top:6px;
+      padding:6px 10px; background:rgba(124,92,255,0.08);
+      border-radius:4px; border-left:2px solid var(--accent);
+    }
+
+    .tag-row { display:flex; flex-wrap:wrap; gap:4px; }
+    .tag {
+      background:var(--panel-2); color:var(--muted); padding:3px 9px;
+      border-radius:4px; font-size:11px;
+    }
+    .tag strong { color:var(--text); }
+
+    .signal-list { list-style:none; padding:0; margin:0; }
+    .signal-list li {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+      font-size:13px;
+    }
+    .signal-list li:last-child { border-bottom:none; }
+    .signal-list .count {
+      font-size:11px; color:var(--muted);
+      background:var(--panel-2); padding:2px 8px; border-radius:999px;
+    }
+    .handle {
+      color:var(--accent); font-family:ui-monospace,'SF Mono',monospace; font-size:12px;
+      text-decoration:none;
+    }
+    .handle:hover { text-decoration:underline; }
+
+    .insight-box {
+      background:rgba(124,92,255,0.06);
+      border:1px solid rgba(124,92,255,0.2);
+      border-radius:10px;
+      padding:14px 16px;
+      font-size:13px; line-height:1.5;
+      margin-bottom:10px;
+    }
+    .insight-box strong { color:var(--text); }
+
+    .empty { padding:50px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:12px; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(124,92,255,0.3); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>🌐 Influence Network</h1>
+      <div class="sub">Who this client orbits — collaborators, thought leaders, peers, and engaged fans.</div>
+      <div class="meta" id="metaLine"></div>
+    </div>
+    <div class="controls">
+      <select id="clientSelect"></select>
+      <button class="primary" id="computeBtn">✨ Compute network</button>
+    </div>
+  </header>
+
+  <div id="content" class="empty">Loading…</div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const computeBtn = document.getElementById('computeBtn');
+    const content = document.getElementById('content');
+    const metaLine = document.getElementById('metaLine');
+
+    async function loadClients() {
+      const res = await fetch('/api/clients');
+      const json = await res.json();
+      const list = (json.data || json).filter(c => c.active !== false).sort((a, b) => a.name.localeCompare(b.name));
+      clientSelect.innerHTML = list.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      const url = new URLSearchParams(location.search).get('client');
+      if (url && list.some(c => c.id === url)) clientSelect.value = url;
+      load();
+    }
+
+    async function load() {
+      const cid = clientSelect.value;
+      if (!cid) return;
+      content.innerHTML = '<div class="empty"><span class="spinner"></span> Loading…</div>';
+      try {
+        const r = await fetch(`/api/influence/${cid}`);
+        if (r.status === 404) {
+          content.innerHTML = `<div class="empty">
+            No influence network computed yet.<br/>
+            <span style="font-size:12px;">Click ✨ Compute network (uses existing scraped data + LLM — takes ~30-60s).</span>
+          </div>`;
+          metaLine.textContent = '';
+          return;
+        }
+        const j = await r.json();
+        render(j.data);
+      } catch (err) {
+        content.innerHTML = `<div class="empty">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function render(d) {
+      const when = d.generatedAt ? new Date(d.generatedAt).toLocaleString('en-GB') : '';
+      metaLine.innerHTML = `${d.postCountAnalysed} posts analysed · generated ${escapeHtml(when)}`;
+
+      const s = d.signals || {};
+      const i = d.insight;
+
+      const orbitHtml = (i?.orbit || []).map(o => {
+        const role = (o.role || 'unclear').toLowerCase().replace(/_/g, '-');
+        return `
+          <div class="orbit-card role-${role}">
+            <div class="orbit-header">
+              <span class="orbit-name">@${escapeHtml(o.name)}</span>
+              <span class="role-pill">${escapeHtml(o.role || 'unclear')}</span>
+            </div>
+            ${o.signal ? `<div class="orbit-signal">${escapeHtml(o.signal)}</div>` : ''}
+            ${o.actionable ? `<div class="orbit-action">→ ${escapeHtml(o.actionable)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      const mentionsList = (s.topMentions || []).slice(0, 10).map(m => `
+        <li><a class="handle" href="https://www.instagram.com/${encodeURIComponent(m.name)}/" target="_blank">@${escapeHtml(m.name)}</a><span class="count">${m.count}×</span></li>
+      `).join('');
+
+      const hashtagsList = (s.topHashtags || []).slice(0, 15).map(h => `<span class="tag">#${escapeHtml(h.name)} <strong>${h.count}</strong></span>`).join('');
+
+      const commentersList = (s.topCommenters || []).slice(0, 10).map(c => `
+        <li><a class="handle" href="https://www.instagram.com/${encodeURIComponent(c.name)}/" target="_blank">@${escapeHtml(c.name)}</a><span class="count">${c.count}×</span></li>
+      `).join('');
+
+      const coMentionsList = (s.coMentions || []).slice(0, 6).map(c => `
+        <li>@${escapeHtml(c.pair[0])} + @${escapeHtml(c.pair[1])}<span class="count">${c.count}× together</span></li>
+      `).join('');
+
+      content.innerHTML = `
+        ${i ? `
+          <div class="card">
+            <h3>Community signal</h3>
+            <div class="insight-box">${escapeHtml(i.communitySignal || '')}</div>
+            ${i.likelyThoughtLeaders?.length ? `
+              <h3>Likely thought leaders for this client</h3>
+              <div class="tag-row" style="margin-bottom:14px;">
+                ${i.likelyThoughtLeaders.map(t => `<span class="tag"><strong>@${escapeHtml(t)}</strong></span>`).join('')}
+              </div>` : ''}
+            ${i.collabOpportunities?.length ? `
+              <h3>Collab opportunities</h3>
+              <ul style="padding-left:18px;font-size:13px;line-height:1.6;color:var(--text);">
+                ${i.collabOpportunities.map(c => `<li>${escapeHtml(c)}</li>`).join('')}
+              </ul>` : ''}
+            ${i.blindSpots ? `
+              <h3 style="margin-top:14px;">Blind spots</h3>
+              <div class="insight-box" style="border-color:rgba(255,107,107,0.25);background:rgba(255,107,107,0.04);">${escapeHtml(i.blindSpots)}</div>` : ''}
+          </div>
+
+          <div class="card">
+            <h3>Orbit — who this client circles with</h3>
+            ${orbitHtml ? `<div class="orbit-grid">${orbitHtml}</div>` : '<div class="empty">No orbit entries</div>'}
+          </div>
+        ` : `
+          <div class="card">
+            <h3>Raw signals only (no LLM insight yet)</h3>
+            <div style="font-size:12px;color:var(--muted);">Click ✨ Compute network to generate LLM analysis.</div>
+          </div>
+        `}
+
+        <div class="layout">
+          <div>
+            <div class="card">
+              <h3>Top @mentions in their captions</h3>
+              ${mentionsList ? `<ul class="signal-list">${mentionsList}</ul>` : '<div style="font-size:12px;color:var(--muted);">No mentions in captions yet</div>'}
+            </div>
+            <div class="card">
+              <h3>Hashtags they use</h3>
+              ${hashtagsList ? `<div class="tag-row">${hashtagsList}</div>` : '<div style="font-size:12px;color:var(--muted);">No hashtags found</div>'}
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>Top engaged commenters</h3>
+              ${commentersList ? `<ul class="signal-list">${commentersList}</ul>` : '<div style="font-size:12px;color:var(--muted);">Run comment intel first to populate</div>'}
+            </div>
+            <div class="card">
+              <h3>Co-mentioned creator pairs</h3>
+              ${coMentionsList ? `<ul class="signal-list">${coMentionsList}</ul>` : '<div style="font-size:12px;color:var(--muted);">No co-mentions yet</div>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    computeBtn.addEventListener('click', async () => {
+      const cid = clientSelect.value;
+      if (!cid) return;
+      computeBtn.disabled = true; computeBtn.innerHTML = '<span class="spinner"></span> Computing…';
+      try {
+        const r = await fetch(`/api/influence/${cid}/compute`, { method:'POST' });
+        const j = await r.json();
+        if (!j.success) throw new Error(j.error);
+        load();
+      } catch (e) { alert('Failed: '+e.message); }
+      finally { computeBtn.disabled = false; computeBtn.innerHTML = '✨ Compute network'; }
+    });
+
+    clientSelect.addEventListener('change', load);
+    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    loadClients();
+  </script>
+</body>
+</html>

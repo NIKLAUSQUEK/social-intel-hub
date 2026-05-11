@@ -1,0 +1,1064 @@
+{
+  "clients": [
+    {
+      "id": "niklaus-quek",
+      "name": "Niklaus Quek",
+      "niche": "AI-native growth systems, one-person businesses, LinkedIn content, Claude Code workflows",
+      "platforms": {
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/niklausquek/",
+          "username": "niklausquek"
+        },
+        "instagram": {
+          "url": "https://www.instagram.com/niklausquek/",
+          "username": "niklausquek"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-18",
+      "competitors": [
+        {
+          "name": "Justin Welsh",
+          "linkedin": "https://www.linkedin.com/in/justinwelsh/"
+        },
+        {
+          "name": "Greg Isenberg",
+          "linkedin": "https://www.linkedin.com/in/gregisenberg/"
+        },
+        {
+          "name": "Dickie Bush",
+          "linkedin": "https://www.linkedin.com/in/dickiebush/"
+        },
+        {
+          "name": "Mark Kashef",
+          "linkedin": "https://www.linkedin.com/in/mark-kashef/"
+        }
+      ]
+    },
+    {
+      "id": "leong-mun-wai",
+      "name": "Leong Mun Wai",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/leong.munwai/",
+          "username": "leong.munwai"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@leong.munwai",
+          "username": "leong.munwai"
+        },
+        "facebook": {
+          "url": "https://www.facebook.com/leongmwofficial/",
+          "username": "leongmwofficial"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/leong-mun-wai/",
+          "username": "leong-mun-wai"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-07",
+      "competitors": [
+        {
+          "name": "Jamus Lim",
+          "party": "Workers' Party",
+          "tiktok": "https://www.tiktok.com/@jamusjlim",
+          "instagram": "https://www.instagram.com/jamusjlim/",
+          "linkedin": "https://www.linkedin.com/in/jamuslim/"
+        },
+        {
+          "name": "Workers' Party (Official)",
+          "party": "Workers' Party",
+          "tiktok": "https://www.tiktok.com/@thehammertok",
+          "instagram": "https://www.instagram.com/workerspartysg/",
+          "linkedin": null
+        },
+        {
+          "name": "PSP (Official)",
+          "party": "Progress Singapore Party",
+          "tiktok": "https://www.tiktok.com/@progresssingaporeparty",
+          "instagram": "https://www.instagram.com/progresssingaporeparty/",
+          "linkedin": null
+        },
+        {
+          "name": "Tan Cheng Bock",
+          "party": "Progress Singapore Party",
+          "tiktok": null,
+          "instagram": "https://www.instagram.com/tanchengbock/",
+          "linkedin": null
+        },
+        {
+          "name": "Lawrence Wong",
+          "party": "PAP (Prime Minister)",
+          "tiktok": "https://www.tiktok.com/@lawrencewongst",
+          "instagram": "https://www.instagram.com/lawrencewongst/",
+          "linkedin": "https://www.linkedin.com/in/lawrence-wong-5a648039/"
+        },
+        {
+          "name": "Sun Xueling",
+          "party": "PAP",
+          "tiktok": "https://www.tiktok.com/@sunxueling",
+          "instagram": "https://www.instagram.com/sunxueling/",
+          "linkedin": "https://www.linkedin.com/in/sun-xueling/"
+        },
+        {
+          "name": "Chan Chun Sing",
+          "party": "PAP",
+          "tiktok": "https://www.tiktok.com/@chanchunsingsg",
+          "instagram": "https://www.instagram.com/chanchunsingsg/",
+          "linkedin": null
+        },
+        {
+          "name": "Ong Ye Kung",
+          "party": "PAP",
+          "tiktok": "https://www.tiktok.com/@ongyekung",
+          "instagram": "https://www.instagram.com/ongyekung/",
+          "linkedin": null
+        },
+        {
+          "name": "Tin Pei Ling",
+          "party": "PAP",
+          "tiktok": "https://www.tiktok.com/@tinpeiling",
+          "instagram": "https://www.instagram.com/tinpeiling/",
+          "linkedin": "https://www.linkedin.com/in/tinpeiling/"
+        },
+        {
+          "name": "Josephine Teo",
+          "party": "PAP",
+          "tiktok": "https://www.tiktok.com/@josephineteo",
+          "instagram": "https://www.instagram.com/josephineteo/",
+          "linkedin": null
+        },
+        {
+          "name": "Edwin Tong",
+          "party": "PAP",
+          "tiktok": null,
+          "instagram": "https://www.instagram.com/edwintong/",
+          "linkedin": "https://www.linkedin.com/in/edwin-tong/"
+        },
+        {
+          "name": "Lim Tean",
+          "party": "Peoples Voice",
+          "tiktok": "https://www.tiktok.com/@limtean",
+          "instagram": null,
+          "linkedin": null
+        }
+      ]
+    },
+    {
+      "id": "john-abraham",
+      "name": "John Abraham",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/johnabraham.rapid/",
+          "username": "johnabraham.rapid"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/john-abraham-physio/",
+          "username": "john-abraham-physio"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-09",
+      "competitors": [
+        {
+          "name": "Rapid Physiocare",
+          "category": "Own Brand",
+          "instagram": "https://www.instagram.com/rapid_physiocare/",
+          "tiktok": null,
+          "linkedin": "https://www.linkedin.com/company/rapid-physiocare/"
+        },
+        {
+          "name": "Rapid Pilates",
+          "category": "Own Brand",
+          "instagram": "https://www.instagram.com/rapidpilates/",
+          "tiktok": null,
+          "linkedin": null
+        },
+        {
+          "name": "Dr Leslie Tay (ieatishootipost)",
+          "category": "SG Entrepreneur Creator",
+          "instagram": "https://www.instagram.com/iaboraham/",
+          "tiktok": "https://www.tiktok.com/@ieatishootipost",
+          "linkedin": null
+        },
+        {
+          "name": "Nas Daily",
+          "category": "SG Creator / Entrepreneur",
+          "instagram": "https://www.instagram.com/nasdaily/",
+          "tiktok": "https://www.tiktok.com/@nasdaily",
+          "linkedin": "https://www.linkedin.com/in/nassarya/"
+        },
+        {
+          "name": "PhysioActive",
+          "category": "Competitor — Physio SG",
+          "instagram": "https://www.instagram.com/physioactive/",
+          "tiktok": null,
+          "linkedin": "https://www.linkedin.com/company/physioactive/"
+        },
+        {
+          "name": "The Moving Body Group",
+          "category": "Competitor — Movement SG",
+          "instagram": "https://www.instagram.com/themovingbodygroup/",
+          "tiktok": null,
+          "linkedin": "https://www.linkedin.com/company/the-moving-body-group/"
+        },
+        {
+          "name": "Trilogy Physiotherapy",
+          "category": "Competitor — Physio SG",
+          "instagram": "https://www.instagram.com/trilogyphysio/",
+          "tiktok": null,
+          "linkedin": null
+        },
+        {
+          "name": "Squat Wolf",
+          "category": "Fitness Brand",
+          "instagram": "https://www.instagram.com/squatwolf/",
+          "tiktok": "https://www.tiktok.com/@squatwolf",
+          "linkedin": "https://www.linkedin.com/company/squatwolf/"
+        }
+      ]
+    },
+    {
+      "id": "jordan-yeoh",
+      "name": "Jordan Yeoh",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/jordanyeohfitness/",
+          "username": "jordanyeohfitness"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@jordanyeohofficial",
+          "username": "jordanyeohofficial"
+        },
+        "facebook": {
+          "url": "https://www.facebook.com/jordanyeohfitness/",
+          "username": "jordanyeohfitness"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-12",
+      "competitors": [
+        {
+          "name": "Chloe Ting",
+          "category": "Fitness Creator (MY-born)",
+          "instagram": "https://www.instagram.com/chloe_t/",
+          "tiktok": "https://www.tiktok.com/@chloe_t",
+          "facebook": "https://www.facebook.com/ChloeTingFitness"
+        },
+        {
+          "name": "Joanna Soh",
+          "category": "Fitness Creator (MY)",
+          "instagram": "https://www.instagram.com/joannasohofficial/",
+          "tiktok": "https://www.tiktok.com/@joannasohofficial",
+          "facebook": "https://www.facebook.com/joannasohofficial"
+        },
+        {
+          "name": "Kevin Zahri",
+          "category": "Fitness Creator (MY)",
+          "instagram": "https://www.instagram.com/kevinzahri/",
+          "tiktok": "https://www.tiktok.com/@kevinzahri",
+          "facebook": "https://www.facebook.com/kevinzahri"
+        },
+        {
+          "name": "Emi Wong",
+          "category": "Fitness Creator (HK/SEA)",
+          "instagram": "https://www.instagram.com/emiwong_/",
+          "tiktok": "https://www.tiktok.com/@emiwong",
+          "facebook": "https://www.facebook.com/emiwongofficial"
+        },
+        {
+          "name": "Pamela Reif",
+          "category": "Fitness Creator (Global)",
+          "instagram": "https://www.instagram.com/pamela_rf/",
+          "tiktok": "https://www.tiktok.com/@pamela_rf",
+          "facebook": "https://www.facebook.com/pamela.rf"
+        },
+        {
+          "name": "Noel Aandan",
+          "category": "Fitness Creator (MY)",
+          "instagram": "https://www.instagram.com/noelaandan/",
+          "tiktok": "https://www.tiktok.com/@noelaandan",
+          "facebook": "https://www.facebook.com/noelaandan"
+        }
+      ]
+    },
+    {
+      "id": "joshua-chan",
+      "name": "Joshua Chan",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/heyjoshchan/",
+          "username": "heyjoshchan"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@heyjoshchan",
+          "username": "heyjoshchan"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/joshua-c-448995229/",
+          "username": "joshua-c-448995229"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "kevin-wee",
+      "name": "Kevin Wee",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/k.weee/",
+          "username": "k.weee"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/kevin-wee-rwr/",
+          "username": "kevin-wee-rwr"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "kevin-wee-radical-kindness",
+      "name": "Kevin Wee (Radical Kindness)",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/radical_kindness_/",
+          "username": "radical_kindness_"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@radical_kindness_",
+          "username": "radical_kindness_"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "ray-fu",
+      "name": "Ray Fu",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/raycfu/",
+          "username": "raycfu"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@ray_fu",
+          "username": "ray_fu"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "tyler-tometich",
+      "name": "Tyler Tometich",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/tylertometich/",
+          "username": "tylertometich"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@tylertometich",
+          "username": "tylertometich"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/tylertometich/",
+          "username": "tylertometich"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "filiano",
+      "name": "Filiano",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/filianspyre/",
+          "username": "filianspyre"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "declann-drostan-tan",
+      "name": "Declann Drostan Tan",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/__diditee__/",
+          "username": "__diditee__"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@__diditee__",
+          "username": "__diditee__"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "marek-knobloch",
+      "name": "Marek Knobloch",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/bymarc.ai/",
+          "username": "bymarc.ai"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "nahid-maz",
+      "name": "Nahid Maz",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/Nahidhere79/",
+          "username": "Nahidhere79"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "tara",
+      "name": "Tara Khoo",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/noproteinshakes/",
+          "username": "noproteinshakes"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/tara-khoo-49702b179/",
+          "username": "tara-khoo-49702b179"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "martin-desouza",
+      "name": "Martin Desouza",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/martindesza/",
+          "username": "martindesza"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@martindesza",
+          "username": "martindesza"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/desouzamartin/",
+          "username": "desouzamartin"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "gabe-chia",
+      "name": "Gabe Chia",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/gabechiaa/",
+          "username": "gabechiaa"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/gabe-chia-ba9988217/",
+          "username": "gabe-chia-ba9988217"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "balaji-selfrunning-clinic",
+      "name": "Balaji Prem Chand (Self Running Clinic)",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/selfrunningclinic.coach/",
+          "username": "selfrunningclinic.coach"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/balajipremchand/",
+          "username": "balajipremchand"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "balaji-heartland-rehab",
+      "name": "Balaji Prem Chand (Heartland Rehab)",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/heartlandrehabsg/",
+          "username": "heartlandrehabsg"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/balajipremchand/",
+          "username": "balajipremchand"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "balaji-city-rehab",
+      "name": "Balaji Prem Chand (City Rehab)",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/cityrehabsg/",
+          "username": "cityrehabsg"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/balajipremchand/",
+          "username": "balajipremchand"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "heal360-physioclinic",
+      "name": "Heal360 Physioclinic",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/physioclinic/",
+          "username": "physioclinic"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "bryan-ang",
+      "name": "Bryan Ang Zhi-Wei",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/bryanangzw/",
+          "username": "bryanangzw"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/bryan-ang-zhi-wei/",
+          "username": "bryan-ang-zhi-wei"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "melvin-soh",
+      "name": "Melvin Soh",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/thegreatmelvinsoh/",
+          "username": "thegreatmelvinsoh"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/melvin-soh-669709194/",
+          "username": "melvin-soh-669709194"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "david-chua",
+      "name": "David Chua",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/davidkychua/",
+          "username": "davidkychua"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "do-hoang-phuc",
+      "name": "Do Hoang Phuc",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/etzondop/",
+          "username": "etzondop"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "business-academy-podcast",
+      "name": "The Business Academy Podcast",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/the_businessacademyofficial/",
+          "username": "the_businessacademyofficial"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "wayne-yap",
+      "name": "Wayne Yap",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/wayneswritings/",
+          "username": "wayneswritings"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "gabriel-judah",
+      "name": "Gabriel Judah",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/gabrieljudah_/",
+          "username": "gabrieljudah_"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "bryan-johnson",
+      "name": "Bryan Johnson",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/bryanjohnson_/",
+          "username": "bryanjohnson_"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@_bryan_johnson_",
+          "username": "_bryan_johnson_"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "nick-saraev",
+      "name": "Nick Saraev",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/nick_saraev/",
+          "username": "nick_saraev"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/nick-saraev/",
+          "username": "nick-saraev"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "grant-mitterlehner",
+      "name": "Grant Mitterlehner",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/grantmitt/",
+          "username": "grantmitt"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@grantmitt",
+          "username": "grantmitt"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/grant-mitterlehner-966343a9/",
+          "username": "grant-mitterlehner-966343a9"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "audrey",
+      "name": "Audrey",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/softgirlnocode/",
+          "username": "softgirlnocode"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@softgirlnocode",
+          "username": "softgirlnocode"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "leann-lai",
+      "name": "LeAnn Lai",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/leann.llx/",
+          "username": "leann.llx"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@leann.llx",
+          "username": "leann.llx"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/le-ann-lai-73a96b21b/",
+          "username": "le-ann-lai-73a96b21b"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "olivia-cho",
+      "name": "Olivia Cho",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/oliviacho_/",
+          "username": "oliviacho_"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "bret-contreras",
+      "name": "Bret Contreras",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/bretcontreras1/",
+          "username": "bretcontreras1"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@gluteguy",
+          "username": "gluteguy"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "jay-ng",
+      "name": "Jay Ng",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/jay.junjie/",
+          "username": "jay.junjie"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/jayngjunjie/",
+          "username": "jayngjunjie"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "daniel-sim",
+      "name": "Daniel Sim",
+      "geography": "Singapore",
+      "niche": "UK property investment education for Singapore investors",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/danielsim.goldengoose/",
+          "username": "danielsim.goldengoose"
+        },
+        "linkedin": {
+          "url": "https://www.linkedin.com/in/maildanielsim/",
+          "username": "maildanielsim"
+        },
+        "facebook": {
+          "url": "https://www.facebook.com/goldengooseproperty/",
+          "username": "goldengooseproperty"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-15",
+      "competitors": []
+    },
+    {
+      "id": "siobhan-ward",
+      "name": "Siobhan Ward",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/THAT_INKED_GIRL_/",
+          "username": "THAT_INKED_GIRL_"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@siobhan_ward",
+          "username": "siobhan_ward"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-17",
+      "competitors": []
+    },
+    {
+      "id": "koocester",
+      "name": "Koocester",
+      "niche": "Singapore luxury lifestyle + viral interviews (luxury car interrogator)",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/koocester/",
+          "username": "koocester"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@koocester",
+          "username": "koocester"
+        },
+        "youtube": {
+          "url": "https://www.youtube.com/@koocester",
+          "username": "koocester"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-23",
+      "competitors": []
+    },
+    {
+      "id": "koocester-business",
+      "name": "Koocester Business",
+      "niche": "Singapore B2B + entrepreneurship content (sister channel of Koocester)",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/koocesterbusiness/",
+          "username": "koocesterbusiness"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@koocesterbusiness",
+          "username": "koocesterbusiness"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-23",
+      "competitors": []
+    },
+    {
+      "id": "koocester-foodie",
+      "name": "Koocester Foodie",
+      "niche": "Singapore food + restaurant reviews (sister channel of Koocester)",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/koocesterfoodie/",
+          "username": "koocesterfoodie"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@koocesterfoodie",
+          "username": "koocesterfoodie"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-23",
+      "competitors": []
+    },
+    {
+      "id": "isaiah-learning-solutions",
+      "name": "Isaiah Learning Solutions",
+      "niche": "Singapore secondary tuition (Chemistry + Math + Science) — ex-MOE teacher Isaiah Low",
+      "geography": "Singapore",
+      "founder": "Isaiah Low",
+      "website": "https://isaiahlearningsolutions.com",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/isaiahlearningsolutions/",
+          "username": "isaiahlearningsolutions"
+        },
+        "facebook": {
+          "url": "https://www.facebook.com/Isaiahlearningsolutions/",
+          "username": "Isaiahlearningsolutions"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-23",
+      "competitors": []
+    },
+    {
+      "id": "bainian-food-court",
+      "name": "Bainian Food Court SG",
+      "niche": "Singapore food court · Chinese cuisine",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/bainianfoodcourtsg/",
+          "username": "bainianfoodcourtsg"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    },
+    {
+      "id": "bainian-sg",
+      "name": "Bainian SG",
+      "niche": "Singapore restaurant · Chinese cuisine",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/bainiansg/",
+          "username": "bainiansg"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@bainiansg",
+          "username": "bainiansg"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    },
+    {
+      "id": "shinian-sg",
+      "name": "Shinian SG",
+      "niche": "Singapore F&B · Chinese cuisine",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/shiniansg/",
+          "username": "shiniansg"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@shiniansg",
+          "username": "shiniansg"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    },
+    {
+      "id": "duduyuecai",
+      "name": "Dudu Yuecai (都都粤菜)",
+      "niche": "Singapore Cantonese cuisine · zi char",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/duduyuecai/",
+          "username": "duduyuecai"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@duduyuecai",
+          "username": "duduyuecai"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    },
+    {
+      "id": "haemee-sg",
+      "name": "Haemee SG (虾面)",
+      "niche": "Singapore prawn noodles · hawker",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/haemeesg/",
+          "username": "haemeesg"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@haemeesg",
+          "username": "haemeesg"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    },
+    {
+      "id": "hae-claypot-sg",
+      "name": "Hae Claypot SG",
+      "niche": "Singapore claypot rice + prawn",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/haeclaypotsg/",
+          "username": "haeclaypotsg"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@haeclaypotsg",
+          "username": "haeclaypotsg"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    },
+    {
+      "id": "baozai-wang",
+      "name": "Baozai Wang (煲仔王)",
+      "niche": "Singapore claypot rice",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/baozaiwang/",
+          "username": "baozaiwang"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@baozaiwang",
+          "username": "baozaiwang"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    },
+    {
+      "id": "peng-jia-zhou-sg",
+      "name": "Peng Jia Zhou SG (彭家粥)",
+      "niche": "Singapore congee + Cantonese porridge",
+      "geography": "Singapore",
+      "platforms": {
+        "instagram": {
+          "url": "https://www.instagram.com/pengjiazhousg/",
+          "username": "pengjiazhousg"
+        },
+        "tiktok": {
+          "url": "https://www.tiktok.com/@pengjiazhousg",
+          "username": "pengjiazhousg"
+        }
+      },
+      "active": true,
+      "addedAt": "2026-04-29",
+      "competitors": []
+    }
+  ]
+}

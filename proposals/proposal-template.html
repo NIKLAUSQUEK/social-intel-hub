@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TITAN.AI — Brand Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+  ⚡ HOW TO USE THIS FILE  ⚡
+  ───────────────────────────────────────────────────────────────────────────
+  1. Generate the JSON for a client using PROMPT.md (paste into Claude / ChatGPT)
+  2. Replace the `PROPOSAL_DATA = {...}` block below with the generated JSON
+  3. Save and open this file in any browser → fully rendered proposal
+  4. Print → "Save as PDF" for a polished deliverable
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<script>
+window.PROPOSAL_DATA = {
+  "meta": {
+    "clientName": "Sample Client",
+    "industry": "Singapore F&B",
+    "preparedFor": "Founder Name",
+    "preparedBy": "TITAN.AI",
+    "date": "29 April 2026",
+    "validUntil": "29 May 2026",
+    "proposalId": "TITAN-2026-001"
+  },
+  "hero": {
+    "tagline": "Your brand,",
+    "taglineAccent": "served sharp.",
+    "subline": "A 12-week growth system designed for your audience, your funnel, your numbers.",
+    "headlineStat": "+312%",
+    "headlineStatLabel": "avg engagement uplift in first 90 days"
+  },
+  "categoryPills": ["Brand audit", "Funnel build", "Content engine", "Competitor moat"],
+  "snapshot": {
+    "currentState": "Your brand has the foundations of a category contender but is leaking attention at the top of funnel and converting too slowly at the bottom.",
+    "opportunityScore": 72,
+    "topThreeWins": [
+      { "title": "Hook architecture", "detail": "Replace 'context-then-payoff' with 'pattern-interrupt-then-promise' — projected 2.3× retention" },
+      { "title": "Format mix", "detail": "Currently 80% talking-head. Industry winners run 45% talking-head + 35% B-roll storytime + 20% reaction" },
+      { "title": "BOF funnel", "detail": "Zero conversion CTAs in last 14 posts. One placed-correctly CTA = 8-12 inbound DMs/wk" }
+    ],
+    "topThreeRisks": [
+      { "title": "Competitor velocity", "detail": "Two named rivals posting 4× your cadence with stronger hooks — content gap widens monthly" },
+      { "title": "Audience drift", "detail": "Comment sentiment shifting from 'eager learner' to 'where's the value' over last 30 days" },
+      { "title": "Algorithm penalty risk", "detail": "Cross-posted identical content across IG + TT triggers reach throttling — observed 41% drop on duplicate posts" }
+    ]
+  },
+  "audience": {
+    "primaryICP": {
+      "name": "The Switched-On Sceptic",
+      "demo": "Singaporeans aged 28-45, dual-income, time-poor, food-curious",
+      "psychographic": "Wants quality without ceremony. Distrusts marketing-speak. Saves before sharing. Decides in 8 seconds.",
+      "painPoints": [
+        "Bombarded with similar food content — everything blurs",
+        "Burned by overhyped places that don't deliver",
+        "Weeknight decisions paralysed by too many options",
+        "Wants insider knowledge, not trend-chasing"
+      ],
+      "where": "TikTok FYP at 7-10pm + Instagram Reels lunchtime + WhatsApp group recommendations"
+    },
+    "secondaryICP": {
+      "name": "The Group-Plan Organiser",
+      "demo": "Family heads + friend-circle decision makers, 30-55",
+      "tldr": "They book the table for 6+. They share to convert their group. Reach them once, you reach 5."
+    },
+    "audienceInsight": "Your audience doesn't want to be sold to — they want to be confidently nudged toward the right answer. Every piece of content should make them feel smarter for choosing you."
+  },
+  "hooks": {
+    "philosophy": "A hook is not a hook unless it earns the next 3 seconds. We test 5 hook formulas against your audience and double down on the 1-2 that pass our retention threshold.",
+    "library": [
+      {
+        "id": "01",
+        "name": "Pattern Interrupt + Promise",
+        "structure": "[Unexpected claim] + [What you'll learn]",
+        "example": "Most $4 hawker bowls beat $40 hotel buffets. Here's why.",
+        "bestFor": ["Top of funnel", "Mass-reach reels"],
+        "retentionLift": "+2.3×"
+      },
+      {
+        "id": "02",
+        "name": "Specificity Hook",
+        "structure": "[Hyper-specific number/name] + [Curiosity gap]",
+        "example": "I tried 14 claypot rice spots in 9 days. Only 3 passed.",
+        "bestFor": ["Authority builds", "Mid-funnel proof"],
+        "retentionLift": "+1.8×"
+      },
+      {
+        "id": "03",
+        "name": "Contrarian Truth",
+        "structure": "[Industry rule] + [Why we break it]",
+        "example": "Everyone says 'never run promos.' Here's why we do — and why our regulars love us more for it.",
+        "bestFor": ["Trust building", "Category leadership"],
+        "retentionLift": "+1.5×"
+      },
+      {
+        "id": "04",
+        "name": "Result First, Method Second",
+        "structure": "[Proof shot] + [Reverse-engineer the how]",
+        "example": "We sold out by 8pm three Saturdays in a row. Three things changed.",
+        "bestFor": ["Bottom of funnel", "Sales triggers"],
+        "retentionLift": "+1.9×"
+      },
+      {
+        "id": "05",
+        "name": "Direct Address",
+        "structure": "[You-language opener] + [Pain or aspiration]",
+        "example": "If you've stopped trying new spots because everywhere disappoints, this is for you.",
+        "bestFor": ["Re-engagement", "Returning audience"],
+        "retentionLift": "+1.4×"
+      }
+    ]
+  },
+  "funnel": {
+    "philosophy": "Each funnel layer has a different job. Most agencies treat all content the same — that's why their numbers are average. We split the engine.",
+    "tof": {
+      "label": "Top of Funnel — Awareness",
+      "purpose": "Pull strangers into orbit. Goal: reach + retention. Not conversion.",
+      "frequency": "60% of cadence",
+      "formats": ["Reel", "TikTok", "Hook carousel", "Trend-jacking video"],
+      "metrics": ["Reach", "Completion rate", "Saves"],
+      "deliverables": "12 reels/month + 8 TikTok-native shorts + 4 trend-jack pieces"
+    },
+    "mof": {
+      "label": "Middle of Funnel — Consideration",
+      "purpose": "Build trust. Show the method. Prove it works.",
+      "frequency": "30% of cadence",
+      "formats": ["Case study", "Behind-the-scenes", "Mini-doc", "Teaching carousel"],
+      "metrics": ["Profile visits", "DM starts", "Save-share ratio"],
+      "deliverables": "6 case studies/month + 4 BTS reels + 2 deep-dive carousels"
+    },
+    "bof": {
+      "label": "Bottom of Funnel — Conversion",
+      "purpose": "Ask. Offer the consult, the booking, the table.",
+      "frequency": "10% of cadence",
+      "formats": ["Offer reel", "Testimonial", "Direct-CTA post", "Live Q&A"],
+      "metrics": ["DMs", "Bookings", "Link clicks", "Walk-ins"],
+      "deliverables": "2 offer pieces/month + 2 testimonial cuts + 1 live moment"
+    }
+  },
+  "competitorBenchmarks": [
+    {
+      "name": "Top rival in your niche",
+      "winning": "Posts 5×/week. Average 11K views/post. Hook formula: stat → personal anecdote → contrarian close.",
+      "where": "Higher TT velocity + named POV in every video",
+      "gap": "Audience asks 'what's their actual menu' — they refuse to show. We exploit that.",
+      "playbook": "Run a 'menu transparency' campaign for first 4 weeks — every post answers a question theirs doesn't."
+    },
+    {
+      "name": "Adjacent category leader",
+      "winning": "Pure visual content + zero-explainer style + relentless consistency",
+      "where": "200K reach per reel via aesthetic hook + B-roll-heavy",
+      "gap": "Lacks personality. Audience knows the brand, not the people.",
+      "playbook": "Counter with founder-led content. Show the human. Earn trust they can't replicate."
+    },
+    {
+      "name": "Emerging local threat",
+      "winning": "Riding TikTok trends 24-48h after they peak — surfing vs creating",
+      "where": "+8K followers/month from trend-jacking alone",
+      "gap": "Trend chasing is ceiling-bound — they'll plateau at 50K. We build durable IP.",
+      "playbook": "Intercept their audience with our trend-jacking layer ('Trend Jacking' module already running) + lock them in with original IP."
+    }
+  ],
+  "trendGaps": [
+    {
+      "trend": "Audio-led storytime explosion",
+      "signal": "70% of viral SG F&B content this month uses 'whispered voiceover + slow B-roll' format",
+      "yourPlay": "Test 4 reels in this format. Compare to current talking-head baseline.",
+      "shelfLife": "8 weeks before saturation"
+    },
+    {
+      "trend": "Behind-the-counter vlogs",
+      "signal": "Hawker creators pulling 200K+ views with raw kitchen/owner content",
+      "yourPlay": "Owner-cam during dinner rush — release as weekly series.",
+      "shelfLife": "Evergreen format — durable beyond trend"
+    },
+    {
+      "trend": "Reaction-vs-rivals",
+      "signal": "Comparison content (your-place vs popular-place) drives 4× shares",
+      "yourPlay": "Strategic comparisons — only with rivals 1 tier up. Builds your category positioning.",
+      "shelfLife": "3-6 months — diminishing once normalised"
+    }
+  ],
+  "education": {
+    "title": "What is actually working in 2026 (that ChatGPT will not tell you).",
+    "intro": "Generic advice has stopped paying. The 2026 algorithm rewards retention engineering, series compounding and identity-led content — not platitudes. Here is the real playbook for your category.",
+    "pillars": [
+      { "weight": "40%", "name": "Process pillar", "purpose": "Show the messy middle. Kitchen B-roll outperforms talking-head 3.4× in F&B because process content opens an information loop the viewer needs to close.", "example": "Top-down wok-toss, no narration, ambient kitchen audio at -18dB. Visual change at 1.3s. End card: 'Bedok. Halal. Open till 1am.'" },
+      { "weight": "25%", "name": "Identity pillar", "purpose": "People follow a person with a worldview, not a content category. Founder POV is the compounding trust asset.", "example": "60s founder voiceover over service B-roll: 'Why I left finance to open the only halal Sichuan place in SG. Episode 1 of 6.'" },
+      { "weight": "20%", "name": "Proof pillar", "purpose": "Real customer reactions and queue/sold-out moments. Replaces the 'review' format that died in 2024.", "example": "Story repost of 6-pax birthday table reaction + on-screen 'walked in 7. Ate at 7:08.'" },
+      { "weight": "15%", "name": "Provocation pillar", "purpose": "One unpopular take per week. Drives saves; comments do the reach work for you.", "example": "'Mala in SG is mostly bad. Here is why ours refuses the shortcut.' Caption acts as second hook, not summary." }
+    ],
+    "aesthetics": [
+      { "name": "Warm-grade handheld", "look": "Slight grain, warm white-balance shift, single-source kitchen light, 24fps, subtle handheld micro-shake.", "useWhen": "Process + Identity content. Anywhere you need 'real, not produced'.", "signal": "Top 6 SG F&B accounts switched to this look between Jan-Mar 2026. The 2023 high-saturation flat-lay look is now reading as 'inauthentic'." },
+      { "name": "Receipt-cam POV", "look": "Phone in left hand, receipt in right, voiceover in second person ('you walk in...').", "useWhen": "Trend-jack and TOF reach posts.", "signal": "Format shelf-life: ~14 weeks before saturation. Currently in week 5 in SG F&B." },
+      { "name": "ASMR sizzle close-up", "look": "Macro lens within 8cm of the food, sound at -12dB, no music, no voice. Visual change every 0.8s for first 4s.", "useWhen": "Ownable category signature shot. Use as opening 1.5s of every Reel — front-loaded hook.", "signal": "Highest 3s-retention format in SG F&B Q1 2026 (38% completion vs 19% category median)." }
+    ],
+    "repurposing": {
+      "title": "The 1 → 9 repurposing tree",
+      "principle": "Ideation is expensive. Fragmentation is free. One 90-minute founder shoot powers 30 days of cross-platform content if you cut it right. Stop chasing ideas. Start chasing cuts.",
+      "tree": [
+        { "from": "SOURCE", "to": "60s founder shoot · single take", "detail": "3 questions, B-roll plate at end. Master file. This is your monthly anchor." },
+        { "from": "→", "to": "1 vertical Reel + 1 native TikTok cut", "detail": "Different opening frame per platform. Loop-hook the TikTok (open with the punchline, force rewatch)." },
+        { "from": "→", "to": "1 IG carousel + 1 LinkedIn long-form", "detail": "Pull 5 quotes for slides. LinkedIn gets the 'why I did this' essay angle." },
+        { "from": "→", "to": "1 Story poll + 1 quote graphic", "detail": "One sentence becomes a poll question. One becomes the grid-break graphic." },
+        { "from": "→", "to": "1 newsletter intro + 1 X/Threads post", "detail": "The unpopular take becomes the cold-open. The same idea — 9 cuts, 5 platforms, 1 voice." }
+      ]
+    },
+    "formatIntel": [
+      { "format": "Front-loaded hook (1.3s rule)", "why": "Visual change + on-screen text + sound shift firing simultaneously in the first 1.3s. Static establishing shots cost you 41% of the audience before second 2.", "watchOut": "Putting your logo or 'so today I want to talk about...' in frame 0 is reach-suicide.", "application": "Re-cut your 6 best-performing reels with new opening frames. Same body, harder front load." },
+      { "format": "Series-based content (Episode 2 effect)", "why": "Episode 2 outperforms Episode 1 by ~1.7× because the loop is open. Episode 6 typically does 4× Episode 1. Compounding > virality.", "watchOut": "Series only works if Episode 1 explicitly names itself a series. 'Episode 1 of 6' on screen.", "application": "Run a 6-part 'Behind the claypot' series. Same shoot day. Drop one per week." },
+      { "format": "Hook reformulation, not idea hunting", "why": "One idea → 5 hook variants (list, contrarian, POV, loop, direct address) → ship all 5 in 10 days. A/B the hook, never the idea. This is how you compound learnings instead of restarting weekly.", "watchOut": "Most agencies test 5 different ideas. That gives you 5 unrelated data points. Test 5 hooks on 1 idea — that gives you a hook formula you own.", "application": "Pick your top-saved post. Rebuild it 5 ways. Track 7-day retention, not likes." }
+    ]
+  },
+
+  "portfolio": [
+    { "client": "Singapore halal F&B brand", "industry": "Casual dining · 1 outlet", "brief": "3.1K followers, 1.9% engagement, 2 posts/week, no funnel logic", "intervention": "Rebuilt content to 4-pillar mix, founder Friday series launched, hook architecture rolled out across top 12 reels", "headlineResult": "+312% reach in 90d", "detail": "Engagement 1.9% → 5.4%. Bookings via IG up 47%. Save rate doubled in week 6." },
+    { "client": "UK property investor educator", "industry": "Personal brand · LinkedIn + IG", "brief": "Strong written content but zero short-form video presence", "intervention": "Voice-mined founder scripts, set up batch shoot day, 12 reels/month with A/B'd hook variants", "headlineResult": "+18.4K followers in 4 months", "detail": "From 0 reels to 48. DM-based discovery calls up 6×. Course waitlist filled in 11 weeks." },
+    { "client": "Singapore F&B group · 4 sub-brands", "industry": "Multi-outlet group", "brief": "Inconsistent voice across brands, no competitor intel, founder time drain", "intervention": "Per-brand voice fingerprints, weekly competitor battlecards, centralised content calendar with sub-brand tone presets", "headlineResult": "−72% founder time on social", "detail": "From 9h/week to 2.5h/week. Aggregate group reach up 198%. Two of four brands hit category top-5." }
+  ],
+
+  "abPhilosophy": {
+    "title": "How we know it works",
+    "principle": "We don't ship and hope. Every format runs through a 7-day A/B framework before we scale it.",
+    "process": [
+      { "step": "Hypothesis", "detail": "Pick one variable to test (hook, length, CTA position). Predict impact." },
+      { "step": "Pair shoot", "detail": "Same topic, same day, two variants. Same audience. Different element." },
+      { "step": "48h evaluation", "detail": "Reach, completion, comments. Calculate retention delta." },
+      { "step": "Verdict", "detail": "Winner becomes new default. Loser becomes documented anti-pattern." },
+      { "step": "Scale", "detail": "Apply learning across 6-week sprint. Re-test quarterly." }
+    ],
+    "exampleResult": "Last quarter, A/B testing on a comparable client revealed 'reverse hook' (payoff first, story second) outperformed standard storytime by 3.1×. Now their default."
+  },
+  "differentiation": [
+    {
+      "claim": "Multi-LLM intelligence chain",
+      "detail": "Most agencies use one ChatGPT subscription. We orchestrate Claude + Gemini + Azure + dedicated fallbacks. Every output passes through 3 model layers for rigour.",
+      "iconChar": "01"
+    },
+    {
+      "claim": "Real audience signal",
+      "detail": "We scrape and decode every comment on every post — sentiment, intent, fan requests. Most agencies guess; we read.",
+      "iconChar": "02"
+    },
+    {
+      "claim": "Trend-jacking layer",
+      "detail": "Active hot-topic intelligence + per-client copy generation. Your reels can be in-market within 6 hours of a trend breaking.",
+      "iconChar": "03"
+    },
+    {
+      "claim": "Voice-trained scripting",
+      "detail": "Every script we write is mined from your past captions — sentence rhythm, slang, emoji density. Sounds like you, not us.",
+      "iconChar": "04"
+    },
+    {
+      "claim": "Battlecard intelligence",
+      "detail": "We map your competitors weekly. You know what they're doing before they post it.",
+      "iconChar": "05"
+    },
+    {
+      "claim": "Outputs your team can ship",
+      "detail": "We deliver editable scripts + storyboards + B-roll lists. Not 30-page strategy decks gathering dust.",
+      "iconChar": "06"
+    }
+  ],
+  "pricing": {
+    "currency": "SGD",
+    "billing": "Monthly retainer · Min 3-month commitment · 30-day notice",
+    "tiers": [
+      {
+        "name": "Starter",
+        "tagline": "For founders going live",
+        "price": "2,500",
+        "priceSuffix": "/month",
+        "best": false,
+        "includes": [
+          "1 brand voice + content audit (one-off)",
+          "Weekly brand intelligence reports",
+          "Audience voice + comment intel (per platform)",
+          "Trend-jacking copy: 4 ideas/week",
+          "12 scripts/month + hooks library",
+          "Telegram + email delivery"
+        ]
+      },
+      {
+        "name": "Growth",
+        "tagline": "For brands ready to scale",
+        "price": "5,800",
+        "priceSuffix": "/month",
+        "best": true,
+        "badge": "Most popular",
+        "includes": [
+          "Everything in Starter, plus:",
+          "Full content calendar (4 weeks ahead)",
+          "Competitor battlecards (weekly)",
+          "Format A/B testing framework",
+          "Voice agent for hands-free briefings",
+          "Brand-strategy report (Opus-grade) every quarter",
+          "Storyboards + B-roll shotlists per script"
+        ]
+      },
+      {
+        "name": "Agency",
+        "tagline": "For multi-brand operators",
+        "price": "12,000",
+        "priceSuffix": "/month",
+        "best": false,
+        "includes": [
+          "Everything in Growth, plus:",
+          "Manage up to 5 sub-brands",
+          "Custom dashboard with white-label PDFs",
+          "Direct Slack channel — 12h response SLA",
+          "Quarterly strategy session with founder",
+          "Custom framework library (your brand's playbook)"
+        ]
+      }
+    ],
+    "addOns": [
+      { "name": "Voice clone (ElevenLabs)", "price": "+ 800/mo" },
+      { "name": "Founder personal brand layer", "price": "+ 1,500/mo" },
+      { "name": "Multi-language adaptation (CN/Malay)", "price": "+ 600/mo" },
+      { "name": "Weekly performance call (45 min)", "price": "+ 400/mo" }
+    ],
+    "guarantee": "If after 90 days you don't see measurable lift in either reach or saves, we refund the third month and part as friends. We've never had to."
+  },
+  "roadmap": {
+    "title": "What the first 90 days look like",
+    "phases": [
+      {
+        "label": "Days 1-14",
+        "title": "Foundation",
+        "outcome": "Brand audit + voice fingerprint + first 4 scripts in your hand"
+      },
+      {
+        "label": "Days 15-45",
+        "title": "Calibration",
+        "outcome": "First sprint of A/B-tested content. Identify winning hook/format combos."
+      },
+      {
+        "label": "Days 46-75",
+        "title": "Scale",
+        "outcome": "Double down on winners. 3-format engine running. First measurable lift."
+      },
+      {
+        "label": "Days 76-90",
+        "title": "Compound",
+        "outcome": "Audience velocity + signature format established. Quarterly strategy reset."
+      }
+    ]
+  },
+  "nextSteps": {
+    "title": "If this lands",
+    "steps": [
+      { "step": "1", "action": "30-min call to align on tier + sign engagement letter" },
+      { "step": "2", "action": "Brand kickoff: voice mining + competitor map (Day 1-7)" },
+      { "step": "3", "action": "First content drop in your hands by Day 14" }
+    ],
+    "cta": "Reply to this proposal or book directly:",
+    "ctaLink": "https://titanai.space",
+    "ctaEmail": "future@titanai.space"
+  }
+};
+</script>
+
+<style>
+  :root {
+    --bg: #0B1020;
+    --bg-2: #0F1530;
+    --panel: #141A2E;
+    --panel-2: #1A2140;
+    --line: rgba(255,255,255,0.08);
+    --text: #E6E8EF;
+    --muted: #8B92A8;
+    --dim: #5B637A;
+    --accent: #7C5CFF;
+    --accent-soft: rgba(124,92,255,0.12);
+    --accent-glow: rgba(124,92,255,0.35);
+    --ok: #4ADE80;
+    --warn: #FBBF24;
+    --err: #FF6B6B;
+    --pink: #F472B6;
+    --cyan: #22D3EE;
+    --orange: #FB923C;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    overflow-x: hidden;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Sticky top nav (Uber Eats-style minimal) ─── */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,16,32,0.85);
+    backdrop-filter: blur(20px) saturate(140%);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: padding 0.2s;
+  }
+  .brand-mark {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 18px; letter-spacing: -0.02em;
+  }
+  .brand-mark .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+  .topnav-meta { font-size: 12px; color: var(--muted); }
+
+  /* ── Hero (Uber Eats restaurant page-style) ───── */
+  .hero {
+    padding: 80px 28px 64px;
+    min-height: 88vh;
+    display: flex; flex-direction: column; justify-content: center;
+    background:
+      radial-gradient(ellipse at 15% 25%, rgba(124,92,255,0.18), transparent 55%),
+      radial-gradient(ellipse at 85% 80%, rgba(34,211,238,0.10), transparent 55%);
+    position: relative;
+  }
+  .hero-eyebrow {
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .hero-title {
+    font-size: clamp(56px, 10vw, 132px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.96;
+    max-width: 1100px;
+    margin-bottom: 28px;
+  }
+  .hero-title .accent {
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: clamp(18px, 1.6vw, 22px);
+    color: var(--muted);
+    max-width: 720px;
+    line-height: 1.55;
+    margin-bottom: 40px;
+  }
+
+  /* Stat block (UberEats restaurant rating-style) */
+  .hero-stat {
+    display: inline-flex; align-items: baseline;
+    gap: 14px;
+    padding: 18px 26px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    align-self: flex-start;
+  }
+  .hero-stat .num {
+    font-size: clamp(28px, 3vw, 38px);
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .hero-stat .label { color: var(--muted); font-size: 14px; }
+
+  /* Category pills row (UberEats' top categories scroll bar) */
+  .pill-row {
+    display: flex; gap: 10px;
+    overflow-x: auto;
+    padding: 8px 0;
+    margin: 32px 0 0;
+    scrollbar-width: none;
+  }
+  .pill-row::-webkit-scrollbar { display: none; }
+  .pill-row .pill {
+    flex-shrink: 0;
+    padding: 10px 22px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .pill-row .pill:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  .meta-strip {
+    margin-top: 64px;
+    display: flex; gap: 26px;
+    flex-wrap: wrap;
+    color: var(--dim);
+    font-size: 13px;
+  }
+  .meta-strip span strong { color: var(--text); font-weight: 600; }
+
+  /* ── Section base ─────────────────────────────── */
+  section.block {
+    padding: 80px 28px;
+    border-top: 1px solid var(--line);
+    position: relative;
+  }
+  .section-tag {
+    display: inline-block;
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding: 4px 10px;
+    background: var(--accent-soft);
+    border-radius: 4px;
+  }
+  .section-title {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin-bottom: 22px;
+    max-width: 1000px;
+  }
+  .section-lead {
+    font-size: clamp(16px, 1.4vw, 19px);
+    color: var(--muted);
+    max-width: 760px;
+    line-height: 1.55;
+  }
+
+  /* ── Snapshot cards (Uber Eats restaurant detail) ── */
+  .snap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 40px;
+  }
+  @media (max-width: 880px) { .snap-grid { grid-template-columns: 1fr; } }
+  .snap-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+  }
+  .snap-card.score {
+    background: linear-gradient(135deg, var(--panel), var(--panel-2));
+    grid-column: span 2;
+    text-align: center;
+  }
+  @media (max-width: 880px) { .snap-card.score { grid-column: span 1; } }
+  .score-num {
+    font-size: clamp(80px, 12vw, 144px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .score-label {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .stack-list { list-style: none; padding: 0; }
+  .stack-list li {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+    display: flex; gap: 16px;
+    align-items: flex-start;
+  }
+  .stack-list li:last-child { border-bottom: none; }
+  .stack-list .num {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 18px;
+    flex-shrink: 0;
+    width: 28px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stack-list h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .stack-list p { color: var(--muted); font-size: 14px; line-height: 1.55; }
+  .card-title {
+    font-size: 12px; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-weight: 700; margin-bottom: 14px;
+  }
+  .card-title.warn { color: var(--err); }
+  .card-title.ok { color: var(--ok); }
+
+  /* ── Audience section ─────────────────────────── */
+  .icp-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 32px;
+    margin-bottom: 14px;
+  }
+  .icp-card.primary { border-color: rgba(124,92,255,0.3); background: linear-gradient(135deg, var(--panel), rgba(124,92,255,0.05)); }
+  .icp-name {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .icp-name::before { content: '◆'; font-size: 8px; }
+  .icp-card h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 14px; }
+  .icp-card .demo { color: var(--muted); font-size: 15px; margin-bottom: 18px; }
+  .icp-card .psycho {
+    font-size: 15px; line-height: 1.6;
+    border-left: 3px solid var(--accent);
+    padding-left: 18px;
+    margin: 18px 0;
+  }
+  .pain-list {
+    list-style: none; padding: 0;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 14px;
+  }
+  @media (max-width: 720px) { .pain-list { grid-template-columns: 1fr; } }
+  .pain-list li {
+    background: rgba(255,255,255,0.03);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text);
+    border-left: 2px solid var(--err);
+  }
+  .where-tag {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: var(--bg);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .where-tag strong { color: var(--cyan); }
+  .audience-insight {
+    margin-top: 26px;
+    padding: 22px 26px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(124,92,255,0.08), rgba(34,211,238,0.04));
+    border: 1px solid rgba(124,92,255,0.2);
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.55;
+  }
+
+  /* ── Hooks library (UberEats menu items) ─────── */
+  .hook-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+    margin-top: 40px;
+  }
+  .hook-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .hook-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .hook-card .hook-id {
+    position: absolute;
+    top: 18px; right: 22px;
+    color: var(--dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .hook-card h4 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    padding-right: 36px;
+  }
+  .hook-card .structure {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  .hook-card .example {
+    font-style: italic;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .hook-card .meta {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .hook-card .lift {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ok);
+  }
+  .hook-card .best-for {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .hook-card .best-for span {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  /* ── Funnel visual (UberEats categorical layout) ── */
+  .funnel-wrap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 40px;
+  }
+  @media (max-width: 880px) { .funnel-wrap { grid-template-columns: 1fr; } }
+  .funnel-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    border-top: 4px solid;
+    display: flex; flex-direction: column;
+  }
+  .funnel-card.tof { border-top-color: var(--cyan); }
+  .funnel-card.mof { border-top-color: var(--warn); }
+  .funnel-card.bof { border-top-color: var(--ok); }
+  .funnel-tier {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .funnel-card.tof .funnel-tier { color: var(--cyan); }
+  .funnel-card.mof .funnel-tier { color: var(--warn); }
+  .funnel-card.bof .funnel-tier { color: var(--ok); }
+  .funnel-card h3 {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.2; margin-bottom: 12px;
+  }
+  .funnel-card .frequency {
+    font-size: 32px;
+    font-weight: 900;
+    margin: 14px 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .funnel-card.tof .frequency { color: var(--cyan); }
+  .funnel-card.mof .frequency { color: var(--warn); }
+  .funnel-card.bof .frequency { color: var(--ok); }
+  .funnel-card .frequency-label {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-top: -8px; margin-bottom: 18px;
+  }
+  .funnel-card .formats {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 18px;
+  }
+  .funnel-card .formats span {
+    font-size: 11px;
+    background: var(--bg);
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: var(--muted);
+  }
+  .funnel-card .deliv {
+    font-size: 13px;
+    color: var(--text);
+    padding: 14px;
+    background: var(--bg);
+    border-radius: 10px;
+    line-height: 1.5;
+    margin-top: auto;
+  }
+
+  /* ── Competitor cards ─────────────────────────── */
+  .comp-list {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .comp-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 30px;
+  }
+  @media (max-width: 880px) { .comp-card { grid-template-columns: 1fr; } }
+  .comp-card h3 { font-size: 24px; font-weight: 800; margin-bottom: 14px; letter-spacing: -0.02em; }
+  .comp-section { margin-bottom: 14px; }
+  .comp-section .label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .comp-section.win .label { color: var(--ok); }
+  .comp-section.gap .label { color: var(--warn); }
+  .comp-section p { font-size: 14px; line-height: 1.55; color: var(--text); }
+  .playbook {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 8px;
+    align-self: stretch;
+  }
+  .playbook .label {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .playbook p { font-size: 14px; line-height: 1.55; color: var(--text); }
+
+  /* ── Trend gaps cards ─────────────────────────── */
+  .trend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+    margin-top: 40px;
+  }
+  .trend-card {
+    background: linear-gradient(135deg, var(--panel), rgba(244,114,182,0.04));
+    border: 1px solid rgba(244,114,182,0.2);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .trend-card h4 { font-size: 18px; font-weight: 800; margin-bottom: 10px; line-height: 1.3; }
+  .trend-card .signal {
+    font-size: 13px; color: var(--muted); margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .trend-card .play {
+    background: var(--bg);
+    border-left: 3px solid var(--pink);
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .trend-card .shelf {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── A/B testing process timeline ─────────────── */
+  .ab-block {
+    margin-top: 40px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 36px;
+  }
+  .ab-block h3 { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .ab-block .principle {
+    color: var(--muted); font-size: 16px; line-height: 1.55;
+    margin-bottom: 28px; max-width: 700px;
+  }
+  .ab-process {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .ab-step {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    position: relative;
+  }
+  .ab-step .step-num {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .ab-step h4 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .ab-step p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .ab-result {
+    background: rgba(74,222,128,0.06);
+    border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ab-result::before {
+    content: '✓';
+    color: var(--ok);
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .ab-result-text { font-size: 14px; line-height: 1.5; }
+
+  /* ── Differentiation grid ─────────────────────── */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+    margin-top: 40px;
+  }
+  .diff-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px;
+  }
+  .diff-card .icon-num {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+  .diff-card h4 { font-size: 19px; font-weight: 800; margin-bottom: 10px; line-height: 1.3; }
+  .diff-card p { color: var(--muted); font-size: 14px; line-height: 1.55; }
+
+  /* ── Pricing (Uber Eats checkout-style cards) ─── */
+  .price-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+    align-items: stretch;
+  }
+  @media (max-width: 980px) { .price-grid { grid-template-columns: 1fr; } }
+  .price-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 32px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .price-card.best {
+    background: linear-gradient(135deg, var(--panel-2), rgba(124,92,255,0.08));
+    border-color: var(--accent);
+    transform: scale(1.02);
+  }
+  @media (max-width: 980px) { .price-card.best { transform: none; } }
+  .price-card.best::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: -10px; left: 24px;
+    background: var(--accent);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+  }
+  .price-card .tier-name { font-size: 14px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+  .price-card .tier-tag { color: var(--text); font-size: 16px; margin: 4px 0 22px; opacity: 0.85; }
+  .price-card .price-num {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 28px;
+  }
+  .price-card .price-num .currency { font-size: 22px; color: var(--muted); margin-right: 4px; vertical-align: top; font-weight: 600; }
+  .price-card .price-num .suffix { font-size: 16px; color: var(--muted); font-weight: 500; }
+  .price-card ul {
+    list-style: none; padding: 0;
+    flex: 1; display: flex; flex-direction: column; gap: 10px;
+  }
+  .price-card ul li {
+    font-size: 14px;
+    line-height: 1.45;
+    padding-left: 26px;
+    position: relative;
+    color: var(--text);
+  }
+  .price-card ul li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 800;
+  }
+
+  .addons {
+    margin-top: 32px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 26px;
+  }
+  .addons-title {
+    font-size: 12px; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-weight: 700; margin-bottom: 14px;
+  }
+  .addons-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  @media (max-width: 720px) { .addons-list { grid-template-columns: 1fr; } }
+  .addon-row {
+    display: flex; justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .addon-row .price { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .pricing-billing {
+    margin-top: 20px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+  .guarantee {
+    margin-top: 20px;
+    padding: 18px 22px;
+    background: rgba(74,222,128,0.05);
+    border: 1px dashed rgba(74,222,128,0.3);
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* ── Roadmap horizontal timeline ──────────────── */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 40px;
+    position: relative;
+  }
+  @media (max-width: 880px) { .timeline { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .timeline { grid-template-columns: 1fr; } }
+  .timeline-step {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    position: relative;
+  }
+  .timeline-step .label {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+  .timeline-step h4 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .timeline-step p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+  /* ── Final CTA ────────────────────────────────── */
+  .cta-block {
+    text-align: center;
+    padding: 100px 28px 80px;
+    background:
+      radial-gradient(ellipse at center, rgba(124,92,255,0.18), transparent 60%);
+    border-top: 1px solid var(--line);
+  }
+  .cta-block h2 {
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 28px;
+  }
+  .cta-steps {
+    display: flex; gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 36px 0;
+  }
+  .cta-step {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 22px;
+    max-width: 280px;
+    text-align: left;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .cta-step .num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .cta-step p { font-size: 14px; line-height: 1.5; }
+  .cta-bar {
+    margin-top: 36px;
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 14px 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: none;
+    box-shadow: 0 12px 40px var(--accent-glow);
+    transition: transform 0.15s;
+  }
+  .cta-bar:hover { transform: translateY(-2px); }
+  .cta-contact {
+    margin-top: 18px; color: var(--muted); font-size: 14px;
+  }
+  .cta-contact a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+  /* ── Reveal animations ────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal.delay-1 { transition-delay: 0.08s; }
+  .reveal.delay-2 { transition-delay: 0.16s; }
+  .reveal.delay-3 { transition-delay: 0.24s; }
+  .reveal.delay-4 { transition-delay: 0.32s; }
+
+  /* ── Print: clean PDF export ──────────────────── */
+  @media print {
+    body { background: white; color: #0B1020; }
+    .topnav { display: none; }
+    section.block, .hero, .cta-block { padding: 32px 24px; page-break-inside: avoid; background: white !important; }
+    .hero { min-height: auto; }
+    .reveal { opacity: 1 !important; transform: none !important; }
+    .hook-card, .funnel-card, .price-card, .diff-card, .trend-card, .icp-card, .snap-card, .ab-block, .timeline-step, .comp-card, .addons {
+      background: white !important; border: 1px solid #E2E8F0 !important; box-shadow: none !important;
+    }
+    .price-card.best { transform: none !important; background: #F8F9FF !important; }
+    .hero-title, .section-title, .cta-block h2 { color: #0B1020 !important; }
+    .hero-title .accent { -webkit-text-fill-color: var(--accent) !important; }
+    .hero-stat { background: #F8F9FF !important; }
+    .audience-insight { background: #F8F9FF !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top nav -->
+<nav class="topnav">
+  <div class="brand-mark">
+    <span>TITAN<span class="dot"></span>AI</span>
+  </div>
+  <div class="topnav-meta" id="topnavMeta"></div>
+</nav>
+
+<!-- Render target -->
+<main id="root"></main>
+
+<script>
+  // Helper to escape HTML
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  function render(d) {
+    const root = document.getElementById('root');
+
+    // Topnav meta
+    document.getElementById('topnavMeta').innerHTML =
+      `<strong>${esc(d.meta.clientName)}</strong> · ${esc(d.meta.industry)} · ${esc(d.meta.proposalId || '')}`;
+    document.title = `TITAN.AI — Proposal · ${d.meta.clientName}`;
+
+    let html = '';
+
+    // ── Hero
+    html += `
+      <section class="hero">
+        <div class="hero-eyebrow reveal">PROPOSAL · ${esc(d.meta.industry)} · ${esc(d.meta.date)}</div>
+        <h1 class="hero-title reveal delay-1">${esc(d.hero.tagline)} <span class="accent">${esc(d.hero.taglineAccent || '')}</span></h1>
+        <p class="hero-sub reveal delay-2">${esc(d.hero.subline)}</p>
+        ${d.hero.headlineStat ? `
+          <div class="hero-stat reveal delay-3">
+            <span class="num">${esc(d.hero.headlineStat)}</span>
+            <span class="label">${esc(d.hero.headlineStatLabel || '')}</span>
+          </div>` : ''}
+        ${d.categoryPills?.length ? `
+          <div class="pill-row reveal delay-3">
+            ${d.categoryPills.map(p => `<div class="pill">${esc(p)}</div>`).join('')}
+          </div>` : ''}
+        <div class="meta-strip reveal delay-4">
+          <span><strong>Prepared for</strong> · ${esc(d.meta.preparedFor)}</span>
+          <span><strong>Prepared by</strong> · ${esc(d.meta.preparedBy)}</span>
+          <span><strong>Valid until</strong> · ${esc(d.meta.validUntil)}</span>
+        </div>
+      </section>
+    `;
+
+    // ── 01 Snapshot
+    if (d.snapshot) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">01 · OPPORTUNITY SNAPSHOT</div>
+          <h2 class="section-title reveal delay-1">Where you're winning,<br/>where you're leaking, and what to fix first.</h2>
+          <p class="section-lead reveal delay-2">${esc(d.snapshot.currentState)}</p>
+          <div class="snap-grid">
+            <div class="snap-card score reveal delay-2">
+              <div class="card-title">Opportunity Score</div>
+              <div class="score-num">${esc(d.snapshot.opportunityScore)}<span style="font-size:0.4em;color:var(--muted);">/100</span></div>
+              <div class="score-label">Based on audience signal · format mix · funnel completeness · competitor gap</div>
+            </div>
+            <div class="snap-card reveal delay-3">
+              <div class="card-title ok">TOP 3 WINS TO PRESS</div>
+              <ul class="stack-list">
+                ${(d.snapshot.topThreeWins || []).map((w, i) => `
+                  <li>
+                    <span class="num">0${i+1}</span>
+                    <div><h4>${esc(w.title)}</h4><p>${esc(w.detail)}</p></div>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+            <div class="snap-card reveal delay-4">
+              <div class="card-title warn">TOP 3 RISKS TO PATCH</div>
+              <ul class="stack-list">
+                ${(d.snapshot.topThreeRisks || []).map((w, i) => `
+                  <li>
+                    <span class="num">0${i+1}</span>
+                    <div><h4>${esc(w.title)}</h4><p>${esc(w.detail)}</p></div>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 02 Audience
+    if (d.audience) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">02 · AUDIENCE & PAIN POINTS</div>
+          <h2 class="section-title reveal delay-1">Who you're really talking to,<br/>and what's stopping them.</h2>
+          <p class="section-lead reveal delay-2">${esc(d.audience.audienceInsight || '')}</p>
+          ${d.audience.primaryICP ? `
+            <div class="icp-card primary reveal delay-3">
+              <div class="icp-name">PRIMARY ICP</div>
+              <h3>${esc(d.audience.primaryICP.name)}</h3>
+              <div class="demo">${esc(d.audience.primaryICP.demo)}</div>
+              <div class="psycho">${esc(d.audience.primaryICP.psychographic)}</div>
+              <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:8px;">Pain points</div>
+              <ul class="pain-list">
+                ${(d.audience.primaryICP.painPoints || []).map(p => `<li>${esc(p)}</li>`).join('')}
+              </ul>
+              ${d.audience.primaryICP.where ? `<div class="where-tag"><strong>Where they live online</strong> · ${esc(d.audience.primaryICP.where)}</div>` : ''}
+            </div>` : ''}
+          ${d.audience.secondaryICP ? `
+            <div class="icp-card reveal delay-4">
+              <div class="icp-name">SECONDARY ICP</div>
+              <h3>${esc(d.audience.secondaryICP.name)}</h3>
+              <div class="demo">${esc(d.audience.secondaryICP.demo)}</div>
+              <div class="psycho">${esc(d.audience.secondaryICP.tldr || '')}</div>
+            </div>` : ''}
+        </section>
+      `;
+    }
+
+    // ── 03 Hooks
+    if (d.hooks?.library?.length) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">03 · HOOK ARCHITECTURE</div>
+          <h2 class="section-title reveal delay-1">Five hook formulas.<br/>Tested. Ranked. Yours.</h2>
+          <p class="section-lead reveal delay-2">${esc(d.hooks.philosophy)}</p>
+          <div class="hook-grid">
+            ${d.hooks.library.map((h, i) => `
+              <div class="hook-card reveal" style="transition-delay:${0.1 + i * 0.05}s">
+                <div class="hook-id">${esc(h.id || ('0'+(i+1)))}</div>
+                <h4>${esc(h.name)}</h4>
+                <div class="structure">${esc(h.structure)}</div>
+                <div class="example">"${esc(h.example)}"</div>
+                <div class="meta">
+                  <div class="best-for">${(h.bestFor || []).map(b => `<span>${esc(b)}</span>`).join('')}</div>
+                  ${h.retentionLift ? `<div class="lift">${esc(h.retentionLift)}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 04 Funnel
+    if (d.funnel) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">04 · FUNNEL ENGINE</div>
+          <h2 class="section-title reveal delay-1">Three funnel layers,<br/>three jobs, three rules.</h2>
+          <p class="section-lead reveal delay-2">${esc(d.funnel.philosophy)}</p>
+          <div class="funnel-wrap">
+            ${['tof', 'mof', 'bof'].map((tier, idx) => {
+              const f = d.funnel[tier];
+              if (!f) return '';
+              return `
+                <div class="funnel-card ${tier} reveal" style="transition-delay:${0.1 + idx * 0.08}s">
+                  <div class="funnel-tier">${esc(f.label)}</div>
+                  <h3>${esc(f.purpose)}</h3>
+                  <div class="frequency">${esc(f.frequency)}</div>
+                  <div class="frequency-label">of cadence</div>
+                  <div class="formats">${(f.formats || []).map(fmt => `<span>${esc(fmt)}</span>`).join('')}</div>
+                  <div class="deliv"><strong>Deliverables · </strong>${esc(f.deliverables || '')}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 05 Competitor benchmarks
+    if (d.competitorBenchmarks?.length) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">05 · COMPETITOR PLAYBOOKS</div>
+          <h2 class="section-title reveal delay-1">What your rivals do well,<br/>where they leave openings.</h2>
+          <div class="comp-list">
+            ${d.competitorBenchmarks.map((c, i) => `
+              <div class="comp-card reveal" style="transition-delay:${0.05 * i}s">
+                <div>
+                  <h3>${esc(c.name)}</h3>
+                  <div class="comp-section win">
+                    <div class="label">What they're winning at</div>
+                    <p>${esc(c.winning)}</p>
+                  </div>
+                  <div class="comp-section">
+                    <div class="label">Where they win</div>
+                    <p>${esc(c.where)}</p>
+                  </div>
+                  <div class="comp-section gap">
+                    <div class="label">The gap they leave</div>
+                    <p>${esc(c.gap)}</p>
+                  </div>
+                </div>
+                <div class="playbook">
+                  <div class="label">Our counter-play</div>
+                  <p>${esc(c.playbook)}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 06 Trend gaps
+    if (d.trendGaps?.length) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">06 · TREND GAPS YOU CAN OWN</div>
+          <h2 class="section-title reveal delay-1">Three trends moving now.<br/>Three plays you can ship this week.</h2>
+          <div class="trend-grid">
+            ${d.trendGaps.map((t, i) => `
+              <div class="trend-card reveal" style="transition-delay:${0.05 * i}s">
+                <h4>${esc(t.trend)}</h4>
+                <div class="signal">${esc(t.signal)}</div>
+                <div class="play"><strong>Your play · </strong>${esc(t.yourPlay)}</div>
+                <div class="shelf">SHELF · ${esc(t.shelfLife)}</div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 06.5 Education — 2026 Playbook (non-generic)
+    if (d.education) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">06.5 · 2026 PLAYBOOK</div>
+          <h2 class="section-title reveal delay-1">${esc(d.education.title || 'What is actually working in 2026.')}</h2>
+          <p class="section-lead reveal delay-2">${esc(d.education.intro || '')}</p>
+
+          ${d.education.pillars?.length ? `
+            <div style="margin-top:36px;">
+              <div class="section-tag reveal" style="margin-bottom:14px;">CONTENT PILLAR SYSTEM</div>
+              <div class="hook-grid">
+                ${d.education.pillars.map((p, i) => `
+                  <div class="hook-card reveal" style="transition-delay:${0.05 * i}s">
+                    <div class="hook-id">${esc(p.weight || '')}</div>
+                    <h4>${esc(p.name)}</h4>
+                    <div class="structure">${esc(p.purpose || '')}</div>
+                    <div class="example">"${esc(p.example || '')}"</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+
+          ${d.education.aesthetics?.length ? `
+            <div style="margin-top:48px;">
+              <div class="section-tag reveal" style="margin-bottom:14px;">AESTHETIC CODES THAT CONVERT</div>
+              <div class="trend-grid">
+                ${d.education.aesthetics.map((a, i) => `
+                  <div class="trend-card reveal" style="transition-delay:${0.05 * i}s">
+                    <h4>${esc(a.name)}</h4>
+                    <div class="signal"><strong>Look · </strong>${esc(a.look || '')}</div>
+                    <div class="play"><strong>Use when · </strong>${esc(a.useWhen || '')}</div>
+                    <div class="shelf">${esc(a.signal || '')}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+
+          ${d.education.repurposing ? `
+            <div class="ab-block reveal" style="margin-top:48px;">
+              <h3>${esc(d.education.repurposing.title || 'The 1 → 9 repurposing tree')}</h3>
+              <p class="principle">${esc(d.education.repurposing.principle || '')}</p>
+              <div class="ab-process">
+                ${(d.education.repurposing.tree || []).map((node, i) => `
+                  <div class="ab-step">
+                    <div class="step-num">${esc(node.from || ('NODE ' + (i+1)))}</div>
+                    <h4>${esc(node.to)}</h4>
+                    <p>${esc(node.detail)}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+
+          ${d.education.formatIntel?.length ? `
+            <div style="margin-top:48px;">
+              <div class="section-tag reveal" style="margin-bottom:14px;">2026 FORMAT VELOCITY</div>
+              <div class="comp-list">
+                ${d.education.formatIntel.map((f, i) => `
+                  <div class="comp-card reveal" style="transition-delay:${0.04 * i}s">
+                    <div>
+                      <h3>${esc(f.format)}</h3>
+                      <div class="comp-section win"><div class="label">Why it is winning right now</div><p>${esc(f.why)}</p></div>
+                      <div class="comp-section"><div class="label">Watch-out</div><p>${esc(f.watchOut || '')}</p></div>
+                    </div>
+                    <div class="playbook"><div class="label">How we apply it for you</div><p>${esc(f.application)}</p></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+        </section>
+      `;
+    }
+
+    // ── 07 A/B testing philosophy
+    if (d.abPhilosophy) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">07 · DATA-DRIVEN PROCESS</div>
+          <h2 class="section-title reveal delay-1">We don't ship and hope.<br/>We test and double down.</h2>
+          <div class="ab-block reveal delay-2">
+            <h3>${esc(d.abPhilosophy.title)}</h3>
+            <p class="principle">${esc(d.abPhilosophy.principle)}</p>
+            <div class="ab-process">
+              ${(d.abPhilosophy.process || []).map((s, i) => `
+                <div class="ab-step">
+                  <div class="step-num">STEP ${i + 1}</div>
+                  <h4>${esc(s.step)}</h4>
+                  <p>${esc(s.detail)}</p>
+                </div>
+              `).join('')}
+            </div>
+            ${d.abPhilosophy.exampleResult ? `
+              <div class="ab-result"><div class="ab-result-text"><strong>Real result · </strong>${esc(d.abPhilosophy.exampleResult)}</div></div>
+            ` : ''}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 08 Differentiation
+    if (d.differentiation?.length) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">08 · WHY TITAN.AI</div>
+          <h2 class="section-title reveal delay-1">Six things normal agencies<br/>simply don't have.</h2>
+          <div class="diff-grid">
+            ${d.differentiation.map((diff, i) => `
+              <div class="diff-card reveal" style="transition-delay:${0.04 * i}s">
+                <div class="icon-num">${esc(diff.iconChar || '0'+(i+1))}</div>
+                <h4>${esc(diff.claim)}</h4>
+                <p>${esc(diff.detail)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 08.5 Portfolio / Results
+    if (d.portfolio?.length) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">08.5 · RESULTS WE HAVE SHIPPED</div>
+          <h2 class="section-title reveal delay-1">Real clients.<br/>Real numbers. No vanity.</h2>
+          <div class="comp-list">
+            ${d.portfolio.map((p, i) => `
+              <div class="comp-card reveal" style="transition-delay:${0.05 * i}s">
+                <div>
+                  <h3>${esc(p.client)}</h3>
+                  <div class="comp-section"><div class="label">${esc(p.industry || 'Sector')}</div><p>${esc(p.brief || '')}</p></div>
+                  <div class="comp-section win"><div class="label">What we did</div><p>${esc(p.intervention || '')}</p></div>
+                </div>
+                <div class="playbook">
+                  <div class="label">Result</div>
+                  <p style="font-size:22px;font-weight:800;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-bottom:8px;">${esc(p.headlineResult || '')}</p>
+                  <p>${esc(p.detail || '')}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 09 Roadmap
+    if (d.roadmap) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">09 · YOUR FIRST 90 DAYS</div>
+          <h2 class="section-title reveal delay-1">${esc(d.roadmap.title)}</h2>
+          <div class="timeline">
+            ${(d.roadmap.phases || []).map((p, i) => `
+              <div class="timeline-step reveal" style="transition-delay:${0.06 * i}s">
+                <div class="label">${esc(p.label)}</div>
+                <h4>${esc(p.title)}</h4>
+                <p>${esc(p.outcome)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    // ── 10 Pricing
+    if (d.pricing?.tiers?.length) {
+      html += `
+        <section class="block">
+          <div class="section-tag reveal">10 · PRICING</div>
+          <h2 class="section-title reveal delay-1">Pick the tier that fits<br/>your stage right now.</h2>
+          <p class="section-lead reveal delay-2">${esc(d.pricing.billing || '')}</p>
+          <div class="price-grid">
+            ${d.pricing.tiers.map((t, i) => `
+              <div class="price-card ${t.best ? 'best' : ''} reveal" style="transition-delay:${0.08 * i}s">
+                <div class="tier-name">${esc(t.name)}</div>
+                <div class="tier-tag">${esc(t.tagline)}</div>
+                <div class="price-num"><span class="currency">${esc(d.pricing.currency || 'SGD')}</span>${esc(t.price)}<span class="suffix">${esc(t.priceSuffix || '/month')}</span></div>
+                <ul>
+                  ${(t.includes || []).map(inc => `<li>${esc(inc)}</li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+          ${d.pricing.addOns?.length ? `
+            <div class="addons reveal">
+              <div class="addons-title">Optional add-ons · stackable on any tier</div>
+              <div class="addons-list">
+                ${d.pricing.addOns.map(a => `
+                  <div class="addon-row"><span>${esc(a.name)}</span><span class="price">${esc(a.price)}</span></div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+          ${d.pricing.guarantee ? `
+            <div class="guarantee reveal">${esc(d.pricing.guarantee)}</div>` : ''}
+        </section>
+      `;
+    }
+
+    // ── 11 CTA
+    if (d.nextSteps) {
+      html += `
+        <section class="cta-block">
+          <h2 class="reveal">${esc(d.nextSteps.title || 'Ready to start?')}</h2>
+          <div class="cta-steps">
+            ${(d.nextSteps.steps || []).map((s, i) => `
+              <div class="cta-step reveal" style="transition-delay:${0.1 * i}s"><span class="num">${esc(s.step || (i+1))}</span><p>${esc(s.action)}</p></div>
+            `).join('')}
+          </div>
+          ${d.nextSteps.ctaLink ? `<a class="cta-bar reveal" href="${esc(d.nextSteps.ctaLink)}" target="_blank">${esc(d.nextSteps.cta || 'Book a call')} →</a>` : ''}
+          ${d.nextSteps.ctaEmail ? `<div class="cta-contact reveal">Or reply directly: <a href="mailto:${esc(d.nextSteps.ctaEmail)}">${esc(d.nextSteps.ctaEmail)}</a></div>` : ''}
+        </section>
+      `;
+    }
+
+    root.innerHTML = html;
+
+    // Reveal observer
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  }
+
+  render(window.PROPOSAL_DATA);
+</script>
+
+</body>
+</html>

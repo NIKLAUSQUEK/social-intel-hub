@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content Calendar — Social Intel</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141a2e;
+      --panel-2: #1a2140;
+      --text: #e6e8ef;
+      --muted: #8b92a8;
+      --accent: #7c5cff;
+      --tof: #60a5fa;
+      --mof: #fbbf24;
+      --bof: #4ade80;
+      --past-high: #4ade80;
+      --past-mid: #fbbf24;
+      --past-low: #475569;
+      --border: rgba(255,255,255,0.08);
+      --beta: #f472b6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .title-row { display: flex; align-items: baseline; gap: 10px; }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; }
+    .beta-pill {
+      background: rgba(244,114,182,0.15);
+      color: var(--beta);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    select, button {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); font-weight: 600; }
+    button.primary:hover { filter: brightness(1.1); }
+    button:hover { background: var(--panel-2); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 18px;
+    }
+    @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+    .main { min-width: 0; }
+    .sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Funnel summary strip */
+    .funnel-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .funnel-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      border-left: 3px solid;
+    }
+    .funnel-card.tof { border-left-color: var(--tof); }
+    .funnel-card.mof { border-left-color: var(--mof); }
+    .funnel-card.bof { border-left-color: var(--bof); }
+    .funnel-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+    .funnel-stat { font-size: 22px; font-weight: 700; margin-top: 4px; }
+    .funnel-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Calendar grid */
+    .cal {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .cal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .month-title { font-size: 15px; font-weight: 600; }
+    .dow {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .dow > div {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+      padding: 4px 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .day {
+      aspect-ratio: 1.1;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      min-height: 80px;
+      overflow: hidden;
+    }
+    .day.other-month { opacity: 0.25; }
+    .day.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    .day-num { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+    .chip {
+      display: block;
+      font-size: 10px;
+      padding: 3px 5px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: rgba(255,255,255,0.05);
+      border-left: 2px solid var(--muted);
+      line-height: 1.3;
+    }
+    .chip.tof { border-left-color: var(--tof); background: rgba(96,165,250,0.08); }
+    .chip.mof { border-left-color: var(--mof); background: rgba(251,191,36,0.08); }
+    .chip.bof { border-left-color: var(--bof); background: rgba(74,222,128,0.08); }
+    .chip.past { background: rgba(255,255,255,0.03); border-left-color: var(--muted); opacity: 0.75; }
+    .chip.past.high { border-left-color: var(--past-high); }
+    .chip.past.mid  { border-left-color: var(--past-mid); }
+    .chip.past.low  { border-left-color: var(--past-low); }
+    .chip.batch {
+      background: rgba(124,92,255,0.14);
+      border-left-color: var(--accent);
+      font-weight: 600;
+    }
+    .chip:hover { cursor: pointer; background: rgba(255,255,255,0.1); }
+
+    /* Sidebar cards */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .idea-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .idea-item:last-child { border-bottom: none; }
+    .idea-title { font-weight: 500; margin-bottom: 3px; }
+    .idea-meta { font-size: 11px; color: var(--muted); }
+    .batch-item {
+      background: rgba(124,92,255,0.08);
+      border-left: 3px solid var(--accent);
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .batch-date { font-weight: 600; }
+
+    /* Details modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 540px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal h2 { margin: 0 0 8px; font-size: 17px; }
+    .modal .section { margin-top: 16px; font-size: 13px; line-height: 1.6; }
+    .modal .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .modal .hook-box {
+      background: rgba(124,92,255,0.08);
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .performance-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title-row">
+        <h1>Content Calendar</h1>
+        <span class="beta-pill">Beta</span>
+      </div>
+      <div class="sub">Past performance + AI-generated 4-week plan + framework-driven hooks.</div>
+    </div>
+    <div class="controls">
+      <select id="clientSelect"></select>
+      <select id="platformSelect">
+        <option value="all">All platforms</option>
+        <option value="instagram">Instagram</option>
+        <option value="tiktok">TikTok</option>
+        <option value="linkedin">LinkedIn</option>
+        <option value="facebook">Facebook</option>
+      </select>
+      <button id="generateBtn" class="primary">✨ Generate AI Plan</button>
+      <button id="refreshBtn">↻</button>
+    </div>
+  </header>
+
+  <!-- Funnel strip -->
+  <div class="funnel-strip">
+    <div class="funnel-card tof">
+      <div class="funnel-label">Top of Funnel · Awareness</div>
+      <div class="funnel-stat"><span id="tofPast">0</span> <span style="font-size:12px;color:var(--muted);">past</span> · <span id="tofPlan">0</span> <span style="font-size:12px;color:var(--muted);">planned</span></div>
+      <div class="funnel-sub">Target: ~60% of cadence · Reels, TikTok, hook carousels</div>
+    </div>
+    <div class="funnel-card mof">
+      <div class="funnel-label">Middle of Funnel · Consideration</div>
+      <div class="funnel-stat"><span id="mofPast">0</span> past · <span id="mofPlan">0</span> planned</div>
+      <div class="funnel-sub">Target: ~30% · Case studies, teaching, proof</div>
+    </div>
+    <div class="funnel-card bof">
+      <div class="funnel-label">Bottom of Funnel · Conversion</div>
+      <div class="funnel-stat"><span id="bofPast">0</span> past · <span id="bofPlan">0</span> planned</div>
+      <div class="funnel-sub">Target: ~10% · Offers, CTAs, testimonials</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="main">
+      <div class="cal">
+        <div class="cal-header">
+          <button id="prevMonthBtn">←</button>
+          <div class="month-title" id="monthTitle">—</div>
+          <button id="nextMonthBtn">→</button>
+        </div>
+        <div class="dow"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>
+        <div class="grid" id="calGrid"></div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="card">
+        <h3>AI Strategy Narrative</h3>
+        <div id="strategyNarrative" class="empty-state" style="padding: 12px 0;">No plan generated yet. Click ✨ Generate AI Plan.</div>
+      </div>
+      <div class="card">
+        <h3>Batching Plan</h3>
+        <div id="batchingPlan" class="empty-state" style="padding: 12px 0;">—</div>
+      </div>
+      <div class="card">
+        <h3>Series to Continue</h3>
+        <div id="seriesList" class="empty-state" style="padding: 12px 0;">No signals yet — needs past performance data.</div>
+      </div>
+      <div class="card">
+        <h3>Audience Asks</h3>
+        <div id="audienceList" class="empty-state" style="padding: 12px 0;">Run comment intel first.</div>
+      </div>
+      <div class="card">
+        <h3>Top Performers</h3>
+        <div id="topPerformers" class="empty-state" style="padding: 12px 0;">No past performance data.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <h2 id="modalTitle">—</h2>
+      <div id="modalBody"></div>
+      <div style="margin-top: 20px; text-align: right;">
+        <button onclick="document.getElementById('modal').classList.remove('open')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const platformSelect = document.getElementById('platformSelect');
+    const generateBtn = document.getElementById('generateBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const calGrid = document.getElementById('calGrid');
+    const monthTitle = document.getElementById('monthTitle');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+
+    // Read initial client from URL query (?client=...)
+    const urlClient = new URLSearchParams(location.search).get('client');
+    let currentMonth = new Date();
+    currentMonth.setDate(1);
+    let data = null;
+
+    async function loadClients() {
+      const res = await fetch('/api/clients');
+      const json = await res.json();
+      const list = (json.data || json).filter(c => c.active !== false).sort((a, b) => a.name.localeCompare(b.name));
+      clientSelect.innerHTML = list.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+      if (urlClient && list.some(c => c.id === urlClient)) {
+        clientSelect.value = urlClient;
+      }
+      loadData();
+    }
+
+    async function loadData() {
+      const clientId = clientSelect.value;
+      if (!clientId) return;
+      const platform = platformSelect.value;
+      calGrid.innerHTML = '<div class="loading">Loading…</div>';
+      try {
+        const res = await fetch(`/api/calendar/${encodeURIComponent(clientId)}?platform=${platform}`);
+        const json = await res.json();
+        data = json.data;
+        renderAll();
+      } catch (err) {
+        calGrid.innerHTML = `<div class="empty-state">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function renderAll() {
+      renderCalendar();
+      renderSidebar();
+      renderFunnelStrip();
+    }
+
+    function renderFunnelStrip() {
+      const past = data?.summary?.byFunnel || { TOF: 0, MOF: 0, BOF: 0 };
+      const items = data?.plannedPlan || [];
+      const planCount = { TOF: 0, MOF: 0, BOF: 0 };
+      for (const i of items) if (planCount[i.funnel] != null) planCount[i.funnel]++;
+
+      document.getElementById('tofPast').textContent = past.TOF;
+      document.getElementById('mofPast').textContent = past.MOF;
+      document.getElementById('bofPast').textContent = past.BOF;
+      document.getElementById('tofPlan').textContent = planCount.TOF;
+      document.getElementById('mofPlan').textContent = planCount.MOF;
+      document.getElementById('bofPlan').textContent = planCount.BOF;
+    }
+
+    function renderCalendar() {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      monthTitle.textContent = currentMonth.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+
+      // Grid: Mon-start. First day of month might be Sun, etc.
+      const firstOfMonth = new Date(year, month, 1);
+      const startWeekday = (firstOfMonth.getDay() + 6) % 7; // 0=Mon
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const today = new Date().toISOString().slice(0,10);
+
+      let html = '';
+
+      // Lead-in days from previous month
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      for (let i = 0; i < startWeekday; i++) {
+        const d = prevMonthDays - startWeekday + i + 1;
+        html += `<div class="day other-month"><div class="day-num">${d}</div></div>`;
+      }
+
+      // Days of this month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const items = itemsForDate(iso);
+        const isToday = iso === today;
+        html += `<div class="day ${isToday ? 'today' : ''}"><div class="day-num">${d}</div>${items.map(renderChip).join('')}</div>`;
+      }
+      // Trailing days from next month to fill weeks
+      const totalCells = startWeekday + daysInMonth;
+      const trailing = (7 - totalCells % 7) % 7;
+      for (let i = 1; i <= trailing; i++) {
+        html += `<div class="day other-month"><div class="day-num">${i}</div></div>`;
+      }
+
+      calGrid.innerHTML = html;
+    }
+
+    function itemsForDate(iso) {
+      const results = [];
+      // Past posts on this date
+      for (const p of (data?.past || [])) {
+        if (p.date && p.date.slice(0,10) === iso) {
+          results.push({ kind: 'past', data: p });
+        }
+      }
+      // Planned items
+      for (const item of (data?.plannedPlan || [])) {
+        if (item.date === iso) {
+          results.push({ kind: 'plan', data: item });
+        }
+      }
+      // Batching days (if matches a filming_date in plan)
+      const plan = data?.plannedPlan?.[0]?._parent || null;
+      return results;
+    }
+
+    function renderChip(entry) {
+      if (entry.kind === 'past') {
+        const p = entry.data;
+        const f = (p.funnel || '').toLowerCase();
+        return `<div class="chip past ${p.performance}" title="${escapeHtml(p.caption.slice(0,150))}" onclick='openModal(${JSON.stringify({title: "Past post · "+p.platform, kind:"past", item:p}).replace(/"/g,"&quot;")})'>${p.format || 'post'} · ${formatMetric(p.metrics)}</div>`;
+      }
+      const i = entry.data;
+      const f = (i.funnel || '').toLowerCase();
+      return `<div class="chip ${f}" title="${escapeHtml(i.topic||'')}" onclick='openModal(${JSON.stringify({title: i.topic, kind:"plan", item:i}).replace(/"/g,"&quot;")})'>${(i.format || '').slice(0,6)} · ${escapeHtml(i.topic||'').slice(0,28)}</div>`;
+    }
+
+    function formatMetric(m) {
+      if (!m) return '';
+      if (m.views) return fmtN(m.views)+'v';
+      if (m.likes) return fmtN(m.likes)+'❤';
+      return '';
+    }
+    function fmtN(n) {
+      if (n>=1_000_000) return (n/1_000_000).toFixed(1)+'M';
+      if (n>=1000) return (n/1000).toFixed(1)+'k';
+      return String(n);
+    }
+
+    function renderSidebar() {
+      // Fetch generated plan details if available
+      loadPlanDetails();
+
+      // Series / audience / top performers come from past data
+      const top = data?.summary?.topPerformers || [];
+      document.getElementById('topPerformers').innerHTML = top.length
+        ? top.slice(0,5).map(p => `
+          <div class="idea-item">
+            <div class="idea-title"><span class="performance-dot" style="background:var(--past-high)"></span>${escapeHtml(p.caption.slice(0,70))}…</div>
+            <div class="idea-meta">${p.platform} · ${p.format || 'post'} · ${fmtN(p.metrics.views || p.metrics.likes || 0)}${p.metrics.views ? ' views' : ' likes'} · ${p.funnel}</div>
+          </div>`).join('')
+        : '<div class="empty-state" style="padding:12px 0;">No past performance data.</div>';
+
+      const ideas = data?.audienceIdeas || [];
+      document.getElementById('audienceList').innerHTML = ideas.length
+        ? ideas.slice(0,5).map(i => `
+          <div class="idea-item">
+            <div class="idea-title">${escapeHtml(i.title || i.topic)}</div>
+            <div class="idea-meta">${i.intentType || 'idea'} · ${i.commentCount || '—'} comments · ${(i.format||'').slice(0,20)}</div>
+          </div>`).join('')
+        : '<div class="empty-state" style="padding:12px 0;">Run comment intel first.</div>';
+    }
+
+    async function loadPlanDetails() {
+      const clientId = clientSelect.value;
+      try {
+        const res = await fetch(`/api/calendar/${encodeURIComponent(clientId)}/plan`);
+        if (!res.ok) return;
+        const { data: plan } = await res.json();
+
+        document.getElementById('strategyNarrative').innerHTML = plan.strategy_narrative
+          ? `<div>${escapeHtml(plan.strategy_narrative)}</div><div style="margin-top:8px;font-size:11px;color:var(--muted);">Generated ${new Date(plan.generatedAt).toLocaleDateString('en-GB')} · ${plan.items?.length || 0} posts · ${plan.weeks} weeks</div>`
+          : '<div class="empty-state" style="padding:12px 0;">No narrative.</div>';
+
+        const batches = plan.batching_plan || [];
+        document.getElementById('batchingPlan').innerHTML = batches.length
+          ? batches.map(b => `
+            <div class="batch-item">
+              <div class="batch-date">${b.filming_date} — ${escapeHtml(b.theme || '')}</div>
+              <div style="color:var(--muted);margin-top:4px;">${escapeHtml(b.outputs||'')}</div>
+              ${(b.shot_list||[]).length ? '<div style="margin-top:6px;color:var(--muted);">→ ' + b.shot_list.slice(0,3).map(escapeHtml).join(', ') + '</div>' : ''}
+            </div>`).join('')
+          : '<div class="empty-state" style="padding:12px 0;">No batching plan.</div>';
+
+        const series = plan.series_to_continue || [];
+        document.getElementById('seriesList').innerHTML = series.length
+          ? series.slice(0,4).map(s => `
+            <div class="idea-item">
+              <div class="idea-title">${escapeHtml(s.series_name || '—')}</div>
+              <div class="idea-meta">${escapeHtml(s.evidence || '')}</div>
+            </div>`).join('')
+          : '<div class="empty-state" style="padding:12px 0;">No series detected.</div>';
+      } catch {
+        // plan not yet generated
+      }
+    }
+
+    // Modal
+    window.openModal = function(payload) {
+      const modal = document.getElementById('modal');
+      const body = document.getElementById('modalBody');
+      document.getElementById('modalTitle').textContent = payload.title || '—';
+      const i = payload.item;
+      if (payload.kind === 'plan') {
+        body.innerHTML = `
+          <div class="section"><div class="label">Platform · Format</div>${escapeHtml(i.platform)} · ${escapeHtml(i.format || '')}</div>
+          <div class="section"><div class="label">Funnel · Pillar</div>${escapeHtml(i.funnel)} · ${escapeHtml(i.pillar || '—')}</div>
+          <div class="section"><div class="label">Hook</div><div class="hook-box">"${escapeHtml(i.hook || '')}"</div></div>
+          ${i.framework ? `<div class="section"><div class="label">Framework</div>Hook: ${escapeHtml(i.framework.hook_id || '—')} · Structure: ${escapeHtml(i.framework.structure_id || '—')}</div>` : ''}
+          ${i.batch_group ? `<div class="section"><div class="label">Film on</div>${escapeHtml(i.batch_group)}</div>` : ''}
+          ${i.expected_duration_sec ? `<div class="section"><div class="label">Duration</div>${i.expected_duration_sec}s</div>` : ''}
+          ${i.why_now ? `<div class="section"><div class="label">Why now</div>${escapeHtml(i.why_now)}</div>` : ''}
+        `;
+      } else if (payload.kind === 'past') {
+        body.innerHTML = `
+          <div class="section"><div class="label">Platform</div>${escapeHtml(i.platform)}</div>
+          <div class="section"><div class="label">Date</div>${new Date(i.date).toLocaleDateString('en-GB')}</div>
+          <div class="section"><div class="label">Caption</div>${escapeHtml(i.caption)}</div>
+          <div class="section"><div class="label">Funnel · Performance</div>${escapeHtml(i.funnel)} · ${escapeHtml(i.performance)}</div>
+          <div class="section"><div class="label">Metrics</div>${formatMetricsFull(i.metrics)}</div>
+          ${i.url ? `<div class="section"><a href="${escapeHtml(i.url)}" target="_blank" style="color:var(--accent);">Open post →</a></div>` : ''}
+        `;
+      }
+      modal.classList.add('open');
+    };
+
+    function formatMetricsFull(m) {
+      if (!m) return '—';
+      return [
+        m.views != null ? `${fmtN(m.views)} views` : null,
+        m.likes != null ? `${fmtN(m.likes)} likes` : null,
+        m.comments != null ? `${fmtN(m.comments)} comments` : null,
+      ].filter(Boolean).join(' · ');
+    }
+
+    // Event wiring
+    clientSelect.addEventListener('change', loadData);
+    platformSelect.addEventListener('change', loadData);
+    refreshBtn.addEventListener('click', loadData);
+    prevMonthBtn.addEventListener('click', () => { currentMonth.setMonth(currentMonth.getMonth()-1); renderCalendar(); });
+    nextMonthBtn.addEventListener('click', () => { currentMonth.setMonth(currentMonth.getMonth()+1); renderCalendar(); });
+
+    generateBtn.addEventListener('click', async () => {
+      const clientId = clientSelect.value;
+      const platform = platformSelect.value;
+      if (!clientId) return;
+      if (!confirm(`Generate AI 4-week plan for ${clientId} (${platform})?\nTakes ~2-3 minutes. You'll get a notification when done.`)) return;
+      generateBtn.disabled = true;
+      generateBtn.textContent = 'Generating…';
+      try {
+        const res = await fetch(`/api/calendar/${encodeURIComponent(clientId)}/generate`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ platform, weeks: 4 }),
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error);
+        alert('Calendar generated. Reloading.');
+        loadData();
+      } catch (err) {
+        alert('Generate failed: ' + err.message);
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = '✨ Generate AI Plan';
+      }
+    });
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    loadClients();
+  </script>
+</body>
+</html>

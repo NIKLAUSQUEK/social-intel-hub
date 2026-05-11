@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trending Audio — Social Intel</title>
+  <style>
+    :root {
+      --bg: #0B1020;
+      --panel: #141A2E;
+      --panel-2: #1A2140;
+      --text: #E6E8EF;
+      --muted: #8B92A8;
+      --accent: #7C5CFF;
+      --cyan: #22D3EE;
+      --pink: #F472B6;
+      --ok: #4ADE80;
+      --warn: #FBBF24;
+      --line: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .title-row { display: flex; align-items: baseline; gap: 10px; }
+    h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    .beta-pill {
+      background: rgba(244,114,182,0.15);
+      color: var(--pink);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .meta-line { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .meta-line strong { color: var(--text); font-weight: 600; }
+
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    select, button, input {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); font-weight: 600; cursor: pointer; }
+    button.primary:hover { filter: brightness(1.1); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    input[type=text] { min-width: 220px; cursor: text; }
+
+    .track-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .track {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .track:hover { border-color: var(--accent); }
+    .track::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+    .track-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.3;
+      padding-right: 36px;
+    }
+    .track-artist { color: var(--muted); font-size: 12px; margin-top: -4px; font-style: italic; }
+    .track-icon {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 30px; height: 30px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .vibe-pill {
+      display: inline-block;
+      background: rgba(124,92,255,0.12);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      width: fit-content;
+    }
+    .section-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag {
+      background: var(--panel-2);
+      color: var(--muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .tag.cyan { color: var(--cyan); background: rgba(34,211,238,0.08); }
+    .tag.pink { color: var(--pink); background: rgba(244,114,182,0.08); }
+
+    .sugg {
+      background: rgba(255,255,255,0.02);
+      border-left: 2px solid var(--accent);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--text);
+      margin-top: 4px;
+    }
+    .timing {
+      color: var(--warn);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: ui-monospace, 'SF Mono', monospace;
+    }
+    .link-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .link-pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .link-pill.tiktok     { background: rgba(34,211,238,0.12); color: var(--cyan); border: 1px solid rgba(34,211,238,0.25); }
+    .link-pill.spotify    { background: rgba(74,222,128,0.12); color: var(--ok); border: 1px solid rgba(74,222,128,0.25); }
+    .link-pill.youtube    { background: rgba(255,107,107,0.12); color: var(--err); border: 1px solid rgba(255,107,107,0.25); }
+    .link-pill.appleMusic { background: rgba(244,114,182,0.12); color: var(--pink); border: 1px solid rgba(244,114,182,0.25); }
+    .link-pill:hover { filter: brightness(1.3); transform: translateY(-1px); }
+    .source-hint {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    .empty-state button { margin-top: 14px; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(124,92,255,0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .score-badge {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--ok);
+      background: rgba(74,222,128,0.08);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+      font-weight: 600;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title-row">
+        <h1>🎵 Trending TikTok Audio</h1>
+        <span class="beta-pill">Beta</span>
+      </div>
+      <div class="sub">Real web-sourced trending sounds with vibe analysis + video-style suggestions per track.</div>
+      <div class="meta-line" id="metaLine"></div>
+    </div>
+    <div class="controls">
+      <select id="clientSelect">
+        <option value="">All tracks (global)</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="Filter by vibe, archetype…" />
+      <button class="primary" id="refreshBtn">✨ Refresh feed</button>
+    </div>
+  </header>
+
+  <div id="list"></div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const searchInput = document.getElementById('searchInput');
+    const list = document.getElementById('list');
+    const metaLine = document.getElementById('metaLine');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    let allTracks = [];
+    let currentData = null;
+
+    async function loadClients() {
+      try {
+        const res = await fetch('/api/clients');
+        const json = await res.json();
+        const clients = (json.data || json).filter(c => c.active !== false);
+        clients.sort((a, b) => a.name.localeCompare(b.name));
+        for (const c of clients) {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.name;
+          clientSelect.appendChild(opt);
+        }
+      } catch { /* ignore */ }
+    }
+
+    async function loadTracks() {
+      const clientId = clientSelect.value;
+      const url = clientId
+        ? `/api/trending-audio/for/${encodeURIComponent(clientId)}`
+        : '/api/trending-audio';
+
+      list.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+      try {
+        const res = await fetch(url);
+        if (res.status === 404) {
+          list.innerHTML = `<div class="empty-state">
+            <div style="font-size:16px;margin-bottom:6px;">No trending audio data yet</div>
+            <div style="font-size:13px;">Click ✨ Refresh feed to scan the web and build your first list.</div>
+          </div>`;
+          return;
+        }
+        if (!res.ok) throw new Error('fetch failed');
+        const json = await res.json();
+        currentData = json.data;
+        allTracks = json.data.tracks || [];
+        render();
+      } catch (err) {
+        list.innerHTML = `<div class="empty-state">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function render() {
+      const query = (searchInput.value || '').toLowerCase().trim();
+      const visible = allTracks.filter(t => {
+        if (!query) return true;
+        const hay = [
+          t.title, t.artist, t.vibe, t.hookTiming, t.sourceHint,
+          ...(t.bestFor||[]), ...(t.videoStyleSuggestions||[]), ...(t.creatorArchetypes||[]),
+        ].join(' ').toLowerCase();
+        return hay.includes(query);
+      });
+
+      const monthStr = currentData?.month || '';
+      const refreshed = currentData?.refreshedAt ? new Date(currentData.refreshedAt).toLocaleString('en-GB') : '';
+      metaLine.innerHTML = `<strong>${allTracks.length}</strong> tracks · ${monthStr} feed · refreshed ${escapeHtml(refreshed)}`;
+
+      if (!visible.length) {
+        list.innerHTML = `<div class="empty-state">No tracks match "${escapeHtml(query)}"</div>`;
+        return;
+      }
+
+      list.innerHTML = `<div class="track-grid">${
+        visible.map((t, i) => renderTrack(t, i)).join('')
+      }</div>`;
+    }
+
+    function renderTrack(t, i) {
+      const bestFor = (t.bestFor || []).map(x => `<span class="tag">${escapeHtml(x)}</span>`).join('');
+      const archetypes = (t.creatorArchetypes || []).map(x => `<span class="tag cyan">${escapeHtml(x)}</span>`).join('');
+      const suggestions = (t.videoStyleSuggestions || []).map(s => `<div class="sugg">${escapeHtml(s)}</div>`).join('');
+      const scoreBadge = (t.relevanceScore && t.relevanceScore > 0)
+        ? `<span class="score-badge">match × ${t.relevanceScore}</span>` : '';
+
+      return `
+        <div class="track">
+          <div class="track-icon">${i+1}</div>
+          <div class="track-title">${escapeHtml(t.title || 'Untitled')}${scoreBadge}</div>
+          <div class="track-artist">${escapeHtml(t.artist || 'unknown')}</div>
+          ${t.vibe ? `<span class="vibe-pill">${escapeHtml(t.vibe)}</span>` : ''}
+
+          ${archetypes ? `
+            <div>
+              <div class="section-label">Fits creators like</div>
+              <div class="tags" style="margin-top:4px;">${archetypes}</div>
+            </div>` : ''}
+
+          ${bestFor ? `
+            <div>
+              <div class="section-label">Best for video format</div>
+              <div class="tags" style="margin-top:4px;">${bestFor}</div>
+            </div>` : ''}
+
+          ${suggestions ? `
+            <div>
+              <div class="section-label">Video style ideas</div>
+              ${suggestions}
+            </div>` : ''}
+
+          ${t.hookTiming ? `
+            <div>
+              <div class="section-label">Hook timing</div>
+              <div class="timing">⚡ ${escapeHtml(t.hookTiming)}</div>
+            </div>` : ''}
+
+          ${(t.links?.tiktok || t.links?.spotify || t.links?.youtube || t.links?.appleMusic) ? `
+            <div>
+              <div class="section-label">Listen / use</div>
+              <div class="link-row">
+                ${t.links.tiktok     ? `<a class="link-pill tiktok"     href="${escapeHtml(t.links.tiktok)}"     target="_blank" rel="noopener">🎵 TikTok</a>` : ''}
+                ${t.links.spotify    ? `<a class="link-pill spotify"    href="${escapeHtml(t.links.spotify)}"    target="_blank" rel="noopener">▶ Spotify</a>` : ''}
+                ${t.links.youtube    ? `<a class="link-pill youtube"    href="${escapeHtml(t.links.youtube)}"    target="_blank" rel="noopener">▶ YouTube</a>` : ''}
+                ${t.links.appleMusic ? `<a class="link-pill appleMusic" href="${escapeHtml(t.links.appleMusic)}" target="_blank" rel="noopener">🎵 Apple</a>` : ''}
+              </div>
+            </div>` : ''}
+
+          ${t.sourceHint ? `
+            <div class="source-hint">${escapeHtml(t.sourceHint)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    refreshBtn.addEventListener('click', async () => {
+      if (!confirm('Refresh trending audio feed? Scans the web via Exa + AI (takes 30-60s). Costs ~$0.03 in API credits.')) return;
+      refreshBtn.disabled = true;
+      refreshBtn.innerHTML = '<span class="spinner"></span> Scanning…';
+      try {
+        const res = await fetch('/api/trending-audio/refresh', { method: 'POST' });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error);
+        alert(`Refreshed — ${json.data.trackCount} tracks from ${json.data.sourceCount} articles.`);
+        loadTracks();
+      } catch (err) {
+        alert('Refresh failed: ' + err.message);
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = '✨ Refresh feed';
+      }
+    });
+
+    clientSelect.addEventListener('change', loadTracks);
+    searchInput.addEventListener('input', render);
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    loadClients().then(loadTracks);
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "social-intel",
+  "version": "1.0.0",
+  "description": "Multi-client social media analytics tracker",
+  "scripts": {
+    "scrape": "node scraper/index.js",
+    "scrape:daily": "node scraper/index.js --mode daily",
+    "scrape:weekly": "node scraper/index.js --mode weekly",
+    "scrape:client": "node scraper/index.js --client",
+    "api": "node api/server.js",
+    "dev": "node api/server.js",
+    "bot": "node bot/telegram.js",
+    "bot:daily": "node bot/telegram.js --daily"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.1",
+    "express": "^4.19.0",
+    "node-fetch": "^3.3.2",
+    "node-telegram-bot-api": "^0.67.0"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.44.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module"
+}

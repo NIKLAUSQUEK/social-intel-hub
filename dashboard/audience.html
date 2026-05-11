@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audience Voice — Social Intel</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141a2e;
+      --panel-2: #1a2140;
+      --text: #e6e8ef;
+      --muted: #8b92a8;
+      --accent: #7c5cff;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+      --neg: #ff6b6b;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    h1 { margin: 0; font-size: 20px; font-weight: 600; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    select {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat { font-size: 28px; font-weight: 600; }
+    .stat-label { color: var(--muted); font-size: 12px; }
+    .sentiment-bar {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .sentiment-bar > div { height: 100%; }
+    .sent-pos { background: var(--ok); }
+    .sent-neu { background: var(--muted); }
+    .sent-neg { background: var(--neg); }
+    .sent-mix { background: var(--warn); }
+    .legend {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .legend span::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .legend .lp::before { background: var(--ok); }
+    .legend .ln::before { background: var(--neg); }
+    .legend .lu::before { background: var(--muted); }
+    .legend .lm::before { background: var(--warn); }
+
+    .section { margin-top: 24px; }
+    .section-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin: 0 0 12px;
+      font-weight: 500;
+    }
+    .idea {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .idea.hate { border-left-color: var(--neg); }
+    .idea.faq { border-left-color: var(--warn); }
+    .idea.controversy { border-left-color: #ec4899; }
+    .idea-type {
+      display: inline-block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .idea-title { font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+    .idea-hook { color: var(--muted); font-style: italic; font-size: 13px; margin-bottom: 10px; }
+    .idea-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .idea-meta span {
+      background: rgba(255,255,255,0.04);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .idea-examples {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .idea-examples li { margin-bottom: 4px; }
+
+    .list { list-style: none; padding: 0; margin: 0; }
+    .list li {
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .list .author { color: var(--muted); font-size: 11px; }
+
+    .empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+    .empty code {
+      background: rgba(255,255,255,0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .footer-cost {
+      margin-top: 32px;
+      padding: 12px 16px;
+      background: var(--panel-2);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Audience Voice</h1>
+      <div class="sub">Content ideas, FAQs, and hate-comment responses distilled from your audience's own words.</div>
+    </div>
+    <select id="clientSelect"></select>
+  </header>
+
+  <div id="content"></div>
+
+  <div class="footer-cost" id="footerCost" hidden></div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const content = document.getElementById('content');
+    const footerCost = document.getElementById('footerCost');
+
+    async function loadClients() {
+      const res = await fetch('/api/clients');
+      const json = await res.json();
+      const list = (json.data || json).filter(c => c.active !== false);
+      list.sort((a, b) => a.name.localeCompare(b.name));
+
+      clientSelect.innerHTML = list.map(c =>
+        `<option value="${c.id}">${c.name}</option>`
+      ).join('');
+
+      if (list.length) {
+        clientSelect.value = list[0].id;
+        loadIntel(list[0].id);
+      }
+    }
+
+    clientSelect.addEventListener('change', e => loadIntel(e.target.value));
+
+    async function loadIntel(clientId) {
+      try {
+        const res = await fetch(`/api/audience/${encodeURIComponent(clientId)}`);
+        if (res.status === 404) return renderEmpty(clientId);
+        if (!res.ok) throw new Error('fetch failed');
+        const data = await res.json();
+        render(data);
+      } catch (err) {
+        renderEmpty(clientId);
+      }
+    }
+
+    function renderEmpty(clientId) {
+      content.innerHTML = `
+        <div class="empty">
+          No comment analysis yet for this client.<br/>
+          Run: <code>node comments/run.js --client ${clientId}</code>
+        </div>`;
+      footerCost.hidden = true;
+    }
+
+    function pct(n) { return Math.round((n || 0) * 100); }
+
+    function render(d) {
+      const s = d.sentiment || {};
+      const posW = pct(s.positive);
+      const neuW = pct(s.neutral);
+      const negW = pct(s.negative);
+      const mixW = pct(s.mixed);
+
+      const topCards = `
+        <div class="grid">
+          <div class="card">
+            <h2>Comments analysed</h2>
+            <div class="stat">${d.commentCount?.toLocaleString() || 0}</div>
+            <div class="stat-label">
+              IG: ${d.postsAnalysed?.ig || 0} posts · TikTok: ${d.postsAnalysed?.tiktok || 0} posts
+            </div>
+          </div>
+          <div class="card">
+            <h2>Sentiment mix</h2>
+            <div class="sentiment-bar">
+              <div class="sent-pos" style="width:${posW}%"></div>
+              <div class="sent-neu" style="width:${neuW}%"></div>
+              <div class="sent-mix" style="width:${mixW}%"></div>
+              <div class="sent-neg" style="width:${negW}%"></div>
+            </div>
+            <div class="legend">
+              <span class="lp">${posW}% positive</span>
+              <span class="lu">${neuW}% neutral</span>
+              <span class="lm">${mixW}% mixed</span>
+              <span class="ln">${negW}% negative</span>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Content ideas generated</h2>
+            <div class="stat">${d.contentIdeas?.length || 0}</div>
+            <div class="stat-label">From ${d.contentIdeas?.length ? 'actionable clusters' : 'no clusters yet'}</div>
+          </div>
+        </div>
+      `;
+
+      const ideasHtml = (d.contentIdeas || []).map(idea => `
+        <div class="idea ${idea.type}">
+          <div class="idea-type">${idea.type?.replace(/_/g, ' ') || 'idea'}</div>
+          <div class="idea-title">${escapeHtml(idea.title || idea.topic)}</div>
+          <div class="idea-hook">"${escapeHtml(idea.hook || '')}"</div>
+          <div class="idea-meta">
+            <span>${idea.format || 'Reel'}</span>
+            <span>${idea.commentCount || 0} comments</span>
+            <span>${(idea.platforms || []).join(', ')}</span>
+            <span>${idea.sentiment || 'neutral'}</span>
+          </div>
+          ${idea.examples?.length ? `
+            <ul class="idea-examples">
+              ${idea.examples.slice(0, 2).map(e => `<li>"${escapeHtml(e)}"</li>`).join('')}
+            </ul>
+          ` : ''}
+          <div class="idea-examples" style="color:var(--text);margin-top:8px"><em>Why it works:</em> ${escapeHtml(idea.whyItWorks || '')}</div>
+        </div>
+      `).join('');
+
+      const fanRequests = (d.fanRequests || []).slice(0, 8).map(r => `
+        <li>${escapeHtml(r.text)} <div class="author">${r.platform}</div></li>
+      `).join('');
+
+      const questions = (d.topQuestions || []).slice(0, 8).map(q => `
+        <li>${escapeHtml(q.text)} <div class="author">@${q.author} · ${q.platform}</div></li>
+      `).join('');
+
+      const haters = (d.hateComments || []).slice(0, 8).map(h => `
+        <li>${escapeHtml(h.text)} <div class="author">${h.topic} · ${h.platform}</div></li>
+      `).join('');
+
+      content.innerHTML = topCards + `
+        ${ideasHtml ? `
+          <div class="section">
+            <div class="section-title">Content ideas</div>
+            ${ideasHtml}
+          </div>
+        ` : ''}
+        ${fanRequests ? `
+          <div class="section">
+            <div class="section-title">Fan requests</div>
+            <ul class="list">${fanRequests}</ul>
+          </div>
+        ` : ''}
+        ${questions ? `
+          <div class="section">
+            <div class="section-title">Top questions</div>
+            <ul class="list">${questions}</ul>
+          </div>
+        ` : ''}
+        ${haters ? `
+          <div class="section">
+            <div class="section-title">Criticism / hate (respond worthy?)</div>
+            <ul class="list">${haters}</ul>
+          </div>
+        ` : ''}
+      `;
+
+      footerCost.hidden = false;
+      footerCost.innerHTML = `Analysis ran ${new Date(d.generatedAt).toLocaleString('en-GB')} · cost $${(d.costs?.total || 0).toFixed(4)}`;
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      }[m]));
+    }
+
+    loadClients();
+  </script>
+</body>
+</html>

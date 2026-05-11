@@ -1,0 +1,41 @@
+# ── Dependencies ──
+node_modules/
+.snapshots/
+
+# ── Secrets (never commit) ──
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+scraper/ig-session.json
+scraper/*-session.json
+
+# ── Per-client scrape data (private intel) ──
+data/
+logs/
+**/screenshots/
+*.log
+
+# ── Generated proposals (per-client deliverables) ──
+proposals/out/
+proposals/input/
+
+# ── Vercel local ──
+.vercel/
+
+# ── OS / editor ──
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# ── Build artefacts ──
+dist/
+build/
+*.pid
+
+# ── Debug captures ──
+debug-*.png
+*.tmp

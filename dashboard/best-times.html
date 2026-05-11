@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best Times + Metrics Audit</title>
+  <style>
+    :root {
+      --bg:#0B1020; --panel:#141A2E; --panel-2:#1A2140;
+      --text:#E6E8EF; --muted:#8B92A8; --accent:#7C5CFF;
+      --ok:#4ADE80; --warn:#FBBF24; --err:#FF6B6B; --cyan:#22D3EE;
+      --line:rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px;
+      font-family: ui-sans-serif, system-ui, 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    header {
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:16px; flex-wrap:wrap; margin-bottom:20px;
+    }
+    h1 { margin:0; font-size:22px; font-weight:700; }
+    .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+    select { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:13px; cursor:pointer; }
+
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    @media (max-width:900px) { .grid-2 { grid-template-columns:1fr; } }
+
+    .card {
+      background:var(--panel); border:1px solid var(--line);
+      border-radius:12px; padding:18px; margin-bottom:14px;
+    }
+    .card h3 {
+      margin:0 0 12px; font-size:14px; font-weight:600;
+      color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;
+    }
+    .platform-tag {
+      display:inline-block; padding:2px 10px; border-radius:4px;
+      font-size:11px; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.05em; margin-right:6px;
+    }
+    .platform-tag.instagram { background:rgba(244,114,182,0.15); color:#f472b6; }
+    .platform-tag.tiktok    { background:rgba(34,211,238,0.15);  color:var(--cyan); }
+    .platform-tag.linkedin  { background:rgba(96,165,250,0.15);  color:#60a5fa; }
+    .platform-tag.facebook  { background:rgba(124,92,255,0.15);  color:var(--accent); }
+
+    .time-slot {
+      background:rgba(124,92,255,0.06);
+      border-left:3px solid var(--accent);
+      padding:10px 14px; border-radius:6px;
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:6px;
+    }
+    .time-slot.benchmark { border-left-color:var(--muted); background:rgba(255,255,255,0.02); }
+    .day { font-weight:700; }
+    .hour { color:var(--muted); font-size:13px; font-family:ui-monospace,'SF Mono',monospace; }
+    .source-tag { font-size:10px; color:var(--muted); }
+
+    .confidence {
+      display:inline-block; padding:2px 10px; border-radius:4px;
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    }
+    .confidence.high   { background:rgba(74,222,128,0.15);  color:var(--ok); }
+    .confidence.medium { background:rgba(251,191,36,0.15);  color:var(--warn); }
+    .confidence.low    { background:rgba(255,107,107,0.15); color:var(--err); }
+
+    /* Day-of-week bar chart */
+    .dow-chart { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:8px; }
+    .dow-col { display:flex; flex-direction:column; align-items:center; }
+    .dow-bar {
+      width:100%; min-height:4px; max-height:80px;
+      background:var(--accent); border-radius:3px 3px 0 0;
+      transition:opacity 0.15s;
+    }
+    .dow-bar.empty { background:rgba(255,255,255,0.06); height:4px; }
+    .dow-label { font-size:10px; color:var(--muted); margin-top:4px; }
+    .dow-value { font-size:9px; color:var(--muted); margin-top:1px; }
+
+    /* Audit card */
+    .completeness-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+      font-size:13px;
+    }
+    .completeness-bar {
+      width:120px; height:6px; background:rgba(255,255,255,0.06);
+      border-radius:3px; overflow:hidden; margin-left:auto; margin-right:8px;
+    }
+    .completeness-fill { height:100%; background:var(--ok); }
+    .completeness-fill.low { background:var(--err); }
+    .completeness-fill.mid { background:var(--warn); }
+    .pct { font-size:11px; color:var(--muted); min-width:34px; text-align:right; }
+
+    .stat-row {
+      display:flex; justify-content:space-between; padding:6px 0;
+      font-size:13px; color:var(--muted);
+    }
+    .stat-row strong { color:var(--text); font-weight:600; }
+
+    .issue {
+      background:rgba(255,107,107,0.06);
+      border-left:3px solid var(--err);
+      padding:8px 12px; border-radius:4px;
+      font-size:12px; color:var(--text);
+      margin-top:6px; line-height:1.5;
+    }
+
+    .empty { padding:40px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:10px; }
+    .note { color:var(--muted); font-size:11px; font-style:italic; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>📅 Best Posting Times + Metrics Audit</h1>
+      <div class="sub">Day-of-week from your real data · hour-of-day from platform benchmarks · accuracy diagnostics.</div>
+    </div>
+    <select id="clientSelect"></select>
+  </header>
+
+  <div id="content" class="empty">Loading…</div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const content = document.getElementById('content');
+
+    async function loadClients() {
+      const res = await fetch('/api/clients');
+      const json = await res.json();
+      const list = (json.data || json).filter(c => c.active !== false).sort((a, b) => a.name.localeCompare(b.name));
+      clientSelect.innerHTML = list.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      const url = new URLSearchParams(location.search).get('client');
+      if (url && list.some(c => c.id === url)) clientSelect.value = url;
+      load();
+    }
+
+    async function load() {
+      const id = clientSelect.value;
+      if (!id) return;
+      content.innerHTML = '<div class="empty">Loading…</div>';
+      try {
+        const [bestRes, auditRes, dowRes] = await Promise.all([
+          fetch(`/api/metrics/${id}/best-times`),
+          fetch(`/api/metrics/${id}/audit`),
+          fetch(`/api/metrics/${id}/dow`),
+        ]);
+        if (!bestRes.ok) {
+          content.innerHTML = '<div class="empty">No post data for this client. Run scraper first.</div>';
+          return;
+        }
+        const best  = (await bestRes.json()).data;
+        const audit = (await auditRes.json()).data;
+        const dow   = (await dowRes.json()).data;
+        render(best, audit, dow);
+      } catch (err) {
+        content.innerHTML = `<div class="empty">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function render(best, audit, dow) {
+      const platforms = Object.keys(best);
+      if (!platforms.length) {
+        content.innerHTML = '<div class="empty">No platform data available.</div>';
+        return;
+      }
+      content.innerHTML = `
+        <div class="grid-2">
+          <div>
+            <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">⏰ Best Times</h2>
+            ${platforms.map(p => renderTimes(p, best[p], dow[p])).join('')}
+          </div>
+          <div>
+            <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">🔬 Metrics Audit</h2>
+            ${platforms.map(p => renderAudit(p, audit[p])).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTimes(plat, rec, dowData) {
+      const recs = rec.topRecommendations || [];
+      const benchHint = rec.benchmarkNote || '';
+      return `
+        <div class="card">
+          <h3><span class="platform-tag ${plat}">${plat}</span>
+              <span class="confidence ${rec.dataConfidence}">${rec.dataConfidence} confidence</span>
+              <span style="font-size:10px;color:var(--muted);float:right;">n=${rec.sampleSize}</span></h3>
+
+          ${recs.length ? recs.map(r => `
+            <div class="time-slot ${r.source.includes('benchmark (no client') ? 'benchmark' : ''}">
+              <span class="day">${escapeHtml(r.day)}</span>
+              <span class="hour">${escapeHtml(r.hour)}</span>
+              <span class="source-tag">${r.score != null ? (r.score*100).toFixed(2)+'%' : 'benchmark'}</span>
+            </div>`).join('') : '<div class="empty" style="padding:14px;font-size:12px;">Need more posts before recommending times.</div>'}
+
+          ${dowData ? renderDowChart(dowData) : ''}
+          <div class="note">${escapeHtml(benchHint)}</div>
+        </div>
+      `;
+    }
+
+    function renderDowChart(dowData) {
+      const buckets = dowData.buckets || [];
+      const max = Math.max(...buckets.map(b => b.avgEngagement || 0));
+      if (max === 0) return '';
+      return `
+        <h3 style="margin-top:14px;">Engagement by day-of-week</h3>
+        <div class="dow-chart">
+          ${buckets.map(b => {
+            const h = b.avgEngagement ? Math.round((b.avgEngagement / max) * 80) : 0;
+            return `
+              <div class="dow-col">
+                <div class="dow-bar ${h===0?'empty':''}" style="height:${h}px" title="${b.postCount} posts"></div>
+                <div class="dow-label">${escapeHtml(b.day)}</div>
+                <div class="dow-value">${b.postCount}p</div>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderAudit(plat, a) {
+      if (!a || a.status === 'no-posts') {
+        return `<div class="card"><h3><span class="platform-tag ${plat}">${plat}</span></h3><div class="empty" style="padding:12px;">No posts</div></div>`;
+      }
+      const c = a.completeness;
+      return `
+        <div class="card">
+          <h3><span class="platform-tag ${plat}">${plat}</span>
+              <span style="font-size:10px;color:var(--muted);float:right;">${a.postCount} posts · ${a.followers ? a.followers.toLocaleString()+' followers' : 'no follower count'}</span></h3>
+
+          <div class="stat-row">Engagement computable<strong>${a.computableEngagement.count}/${a.postCount} (${a.computableEngagement.percent}%)</strong></div>
+          <div class="stat-row">Avg engagement rate<strong>${a.engagementStats.avg != null ? (a.engagementStats.avg*100).toFixed(2)+'%' : '—'}</strong></div>
+          <div class="stat-row">Median engagement rate<strong>${a.engagementStats.median != null ? (a.engagementStats.median*100).toFixed(2)+'%' : '—'}</strong></div>
+          <div class="stat-row">Denominator (views vs followers)<strong>${a.denominatorBreakdown.views}v · ${a.denominatorBreakdown.followers}f · ${a.denominatorBreakdown.uncomputable}—</strong></div>
+
+          <h3 style="margin-top:14px;">Field completeness</h3>
+          ${Object.entries(c).map(([f, v]) => {
+            const cls = v.percent >= 80 ? '' : (v.percent >= 40 ? 'mid' : 'low');
+            return `
+              <div class="completeness-row">
+                <span>${escapeHtml(f)}</span>
+                <div class="completeness-bar"><div class="completeness-fill ${cls}" style="width:${v.percent}%"></div></div>
+                <span class="pct">${v.percent}%</span>
+              </div>`;
+          }).join('')}
+
+          ${a.issues?.length ? a.issues.map(i => `<div class="issue">⚠️ ${escapeHtml(i)}</div>`).join('') : ''}
+        </div>
+      `;
+    }
+
+    clientSelect.addEventListener('change', load);
+    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    loadClients();
+  </script>
+</body>
+</html>

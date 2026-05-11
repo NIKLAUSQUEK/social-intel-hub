@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — Social Intel</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141a2e;
+      --panel-2: #1a2140;
+      --text: #e6e8ef;
+      --muted: #8b92a8;
+      --accent: #7c5cff;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+      --err: #ff6b6b;
+      --info: #60a5fa;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .controls { display: flex; gap: 8px; align-items: center; }
+    select, button {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:hover { background: var(--panel-2); }
+    .badge {
+      background: var(--accent);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .notif {
+      display: flex;
+      gap: 14px;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: background 0.15s;
+    }
+    .notif.unread { border-left: 3px solid var(--accent); }
+    .notif.read { opacity: 0.55; }
+    .notif:hover { background: var(--panel-2); }
+
+    .icon {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .icon.success { background: rgba(74, 222, 128, 0.15); color: var(--ok); }
+    .icon.warn    { background: rgba(251, 191, 36, 0.15); color: var(--warn); }
+    .icon.error   { background: rgba(255, 107, 107, 0.15); color: var(--err); }
+    .icon.info    { background: rgba(96, 165, 250, 0.15); color: var(--info); }
+
+    .body { flex: 1; min-width: 0; }
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .title { font-weight: 600; font-size: 14px; }
+    .time { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .body-text { font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
+    .meta-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .client-tag {
+      background: rgba(255,255,255,0.05);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+      font-size: 11px;
+    }
+    .mark {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+    .mark:hover { color: var(--accent); border-color: var(--accent); }
+
+    .empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Notifications <span class="badge" id="unreadBadge" hidden>0</span></h1>
+      <div class="sub">Live updates on brand reports, validations, and scheduled jobs — per client.</div>
+    </div>
+    <div class="controls">
+      <select id="clientSelect">
+        <option value="">All clients</option>
+      </select>
+      <select id="filterSelect">
+        <option value="all">All</option>
+        <option value="unread">Unread only</option>
+      </select>
+      <button id="markAllBtn">Mark all read</button>
+      <button id="refreshBtn">↻ Refresh</button>
+    </div>
+  </header>
+
+  <div id="list"></div>
+
+  <script>
+    const clientSelect = document.getElementById('clientSelect');
+    const filterSelect = document.getElementById('filterSelect');
+    const list = document.getElementById('list');
+    const badge = document.getElementById('unreadBadge');
+
+    async function loadClients() {
+      try {
+        const res = await fetch('/api/clients');
+        const json = await res.json();
+        const clients = (json.data || json).filter(c => c.active !== false);
+        clients.sort((a, b) => a.name.localeCompare(b.name));
+        for (const c of clients) {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.name;
+          clientSelect.appendChild(opt);
+        }
+      } catch { /* ignore */ }
+    }
+
+    async function loadNotifications() {
+      const clientId = clientSelect.value;
+      const unread = filterSelect.value === 'unread';
+      const params = new URLSearchParams({ limit: 100 });
+      if (unread) params.set('unread', '1');
+      const url = clientId
+        ? `/api/notifications/${encodeURIComponent(clientId)}?${params}`
+        : `/api/notifications?${params}`;
+      try {
+        const res = await fetch(url);
+        const json = await res.json();
+        render(json.notifications || []);
+      } catch (err) {
+        list.innerHTML = `<div class="empty">Error loading: ${escapeHtml(err.message)}</div>`;
+      }
+      loadBadge();
+    }
+
+    async function loadBadge() {
+      try {
+        const res = await fetch('/api/notifications/unread-count');
+        const { count } = await res.json();
+        if (count > 0) {
+          badge.textContent = count;
+          badge.hidden = false;
+        } else {
+          badge.hidden = true;
+        }
+      } catch { /* ignore */ }
+    }
+
+    function render(notifications) {
+      if (!notifications.length) {
+        list.innerHTML = `<div class="empty">No notifications yet.<br/><span style="font-size:12px;">Run a brand report, opportunities analysis, or scheduled compliance check to see activity here.</span></div>`;
+        return;
+      }
+      list.innerHTML = notifications.map(n => {
+        const iconChar = { success: '✓', warn: '!', error: '✕', info: 'i' }[n.priority] || 'i';
+        const ago = timeAgo(n.createdAt);
+        return `
+          <div class="notif ${n.read ? 'read' : 'unread'}">
+            <div class="icon ${n.priority}">${iconChar}</div>
+            <div class="body">
+              <div class="row-top">
+                <div class="title">${escapeHtml(n.title)}</div>
+                <div class="time">${ago}</div>
+              </div>
+              <div class="body-text">${escapeHtml(n.body || '')}</div>
+              <div class="meta-row">
+                <span class="client-tag">${escapeHtml(n.clientId)}</span>
+                ${n.meta?.durationMs ? `<span>${(n.meta.durationMs/1000).toFixed(0)}s</span>` : ''}
+                ${n.meta?.confidence ? `<span>conf: ${escapeHtml(n.meta.confidence)}</span>` : ''}
+                ${n.meta?.battlecardCount != null ? `<span>${n.meta.battlecardCount} battlecards</span>` : ''}
+                ${n.link ? `<a href="${escapeHtml(n.link)}" style="color:var(--accent);text-decoration:none;">open →</a>` : ''}
+                ${!n.read ? `<button class="mark" data-client="${escapeHtml(n.clientId)}" data-id="${escapeHtml(n.id)}">mark read</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      list.querySelectorAll('.mark').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const { client, id } = e.currentTarget.dataset;
+          await fetch(`/api/notifications/${encodeURIComponent(client)}/${encodeURIComponent(id)}/read`, { method: 'POST' });
+          loadNotifications();
+        });
+      });
+    }
+
+    document.getElementById('markAllBtn').addEventListener('click', async () => {
+      const clientId = clientSelect.value;
+      if (!clientId) {
+        // Mark all across all clients
+        const res = await fetch('/api/notifications?limit=200');
+        const { notifications } = await res.json();
+        const ids = [...new Set(notifications.filter(n => !n.read).map(n => n.clientId))];
+        await Promise.all(ids.map(cid => fetch(`/api/notifications/${encodeURIComponent(cid)}/read-all`, { method: 'POST' })));
+      } else {
+        await fetch(`/api/notifications/${encodeURIComponent(clientId)}/read-all`, { method: 'POST' });
+      }
+      loadNotifications();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', loadNotifications);
+    clientSelect.addEventListener('change', loadNotifications);
+    filterSelect.addEventListener('change', loadNotifications);
+
+    function timeAgo(iso) {
+      if (!iso) return '';
+      const diff = Date.now() - new Date(iso).getTime();
+      const s = Math.floor(diff / 1000);
+      if (s < 60) return s + 's ago';
+      if (s < 3600) return Math.floor(s/60) + 'm ago';
+      if (s < 86400) return Math.floor(s/3600) + 'h ago';
+      return Math.floor(s/86400) + 'd ago';
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;',
+      }[m]));
+    }
+
+    loadClients().then(loadNotifications);
+    // Poll every 10s so notifications appear live while you wait
+    setInterval(loadNotifications, 10_000);
+  </script>
+</body>
+</html>
