@@ -562,7 +562,7 @@
         else if (activeTab === 'analysis') tabContent = renderAnalysis(d);
         else if (activeTab === 'notifications') tabContent = window.renderNotifications ? window.renderNotifications(d, selectedId) : '<div class="muted">Notifications not available.</div>';
         else if (activeTab === 'content-intel') tabContent = window.renderContentIntel ? window.renderContentIntel(d.intelData || {}) : '<div class="muted">Content Intel not available.</div>';
-        else if (activeTab === 'hook-lab') tabContent = window.renderHookLab ? window.renderHookLab(d.intelData || {}) : '<div class="muted">Hook Lab not available.</div>';
+        else if (activeTab === 'hook-lab') tabContent = window.renderHookLab ? window.renderHookLab(d) : '<div class="muted">Hook Lab not available.</div>';
         else if (activeTab === 'opportunities') tabContent = window.renderOpportunities ? window.renderOpportunities(d.intelData || {}) : '<div class="muted">Opportunities not available.</div>';
         else tabContent = '<div class="muted">Select a tab from the sidebar.</div>';
       }
@@ -573,6 +573,14 @@
           <div class="topbar-title">Social Intel</div>
           <div class="topbar-right">
             ${d.metrics?.scrapedAt ? `<span class="last-scrape-badge">Last scraped: ${fmtDate(d.metrics.scrapedAt)}</span>` : ''}
+            <button id="scrape-now-btn" data-action="scrape-now" title="Run the scraper for this client right now"
+              style="padding:6px 14px;font-size:12px;font-weight:600;border-radius:8px;background:#7C5CFC;color:#fff;border:none;cursor:pointer;">
+              🔄 Scrape now
+            </button>
+            <button id="gen-proposal-btn" data-action="gen-proposal" title="Auto-generate a complete proposal JSON from this client's brand report"
+              style="padding:6px 14px;font-size:12px;font-weight:600;border-radius:8px;background:#fff;color:#475569;border:1px solid #E2E8F0;cursor:pointer;">
+              📄 Generate proposal
+            </button>
             ${clients.length > 0 ? `
               <div class="client-pill">
                 <div class="client-avatar">${client ? getInitials(client.name) : '?'}</div>
@@ -582,6 +590,7 @@
               </div>
             ` : ''}
           </div>
+          <div id="scrape-status" style="position:fixed;bottom:20px;right:20px;z-index:1000;display:none;background:#1E293B;color:#fff;padding:14px 18px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.3);max-width:380px;font-size:13px;"></div>
         </div>
 
         ${client ? `
@@ -668,6 +677,122 @@
         }
         return;
       }
+      // Run scraper from the dashboard (replaces "ask Claude Code to run it")
+      if (tab && tab.dataset.action === 'scrape-now') {
+        const btn = tab;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Starting scrape...';
+        const status = document.getElementById('scrape-status');
+        if (status) { status.style.display = 'block'; status.textContent = 'Starting scrape for ' + selectedId + '...'; }
+        try {
+          const res = await fetch(`${API}/scrape/run`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientId: selectedId }),
+          });
+          const json = await res.json();
+          if (!json.success) throw new Error(json.error || 'Scrape start failed');
+          const jobId = json.data.jobId;
+          if (status) status.textContent = '⏳ Scraping ' + selectedId + '... (job ' + jobId.slice(-6) + ')';
+
+          // Poll every 4s until done
+          const poll = async () => {
+            try {
+              const r = await fetch(`${API}/scrape/status/${jobId}`);
+              const j = await r.json();
+              if (!j.success) throw new Error(j.error || 'status failed');
+              const job = j.data;
+              const tail = (job.stdout || '').split('\n').slice(-2).join(' · ');
+              if (status) status.innerHTML = '<div style="font-weight:700;margin-bottom:4px;">' + (job.status === 'running' ? '⏳' : job.status === 'success' ? '✓' : '✗') + ' ' + job.status + '</div><div style="font-size:11px;opacity:0.8;">' + (tail || job.error || '...') + '</div>';
+              if (job.status === 'running') {
+                setTimeout(poll, 4000);
+              } else {
+                btn.disabled = false;
+                btn.innerHTML = '🔄 Scrape now';
+                if (job.status === 'success') {
+                  setTimeout(() => { if (status) status.style.display = 'none'; loadClient(selectedId); }, 4000);
+                } else {
+                  setTimeout(() => { if (status) status.style.display = 'none'; }, 12000);
+                }
+              }
+            } catch (e) {
+              if (status) status.textContent = 'Poll error: ' + e.message;
+              btn.disabled = false;
+              btn.innerHTML = '🔄 Scrape now';
+            }
+          };
+          setTimeout(poll, 3000);
+        } catch (err) {
+          if (status) status.textContent = '✗ ' + err.message;
+          btn.disabled = false;
+          btn.innerHTML = '🔄 Scrape now';
+        }
+        return;
+      }
+
+      // C4: Generate proposal — calls the auto-proposal endpoint + opens the renderer with prefilled JSON
+      if (tab && tab.dataset.action === 'gen-proposal') {
+        const btn = tab;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Generating...';
+        const status = document.getElementById('scrape-status');
+        if (status) { status.style.display = 'block'; status.textContent = '⏳ Generating proposal for ' + selectedId + '. This calls the LLM (~30-60s)...'; }
+        try {
+          const res = await fetch(`${API}/analyse/${selectedId}/auto-proposal`, { method: 'POST' });
+          const json = await res.json();
+          if (!json.success) throw new Error(json.error || 'Generation failed');
+          // Stash on window + open the proposal renderer with the JSON pre-filled
+          const proposalJSON = JSON.stringify(json.data, null, 2);
+          // Copy to clipboard so user can paste into proposal-template.html
+          try {
+            await navigator.clipboard.writeText(proposalJSON);
+            if (status) status.innerHTML = '<div style="font-weight:700;">✓ Proposal JSON ready</div><div style="font-size:11px;opacity:0.8;margin-top:4px;">Copied to clipboard. Opening proposal renderer — paste with Cmd/Ctrl+V.</div>';
+          } catch {
+            if (status) status.innerHTML = '<div style="font-weight:700;">✓ Proposal JSON generated</div><div style="font-size:11px;opacity:0.8;margin-top:4px;">Clipboard blocked — see download link.</div>';
+          }
+          // Download as .json so user has a copy
+          const blob = new Blob([proposalJSON], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = `proposal-${selectedId}.json`; a.click();
+          URL.revokeObjectURL(url);
+          setTimeout(() => { if (status) status.style.display = 'none'; }, 10000);
+        } catch (err) {
+          if (status) status.innerHTML = '<div style="font-weight:700;color:#FCA5A5;">✗ ' + err.message + '</div>';
+          setTimeout(() => { if (status) status.style.display = 'none'; }, 8000);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '📄 Generate proposal';
+        return;
+      }
+
+      // A8: Archive now — trigger Internet Archive Save Page Now for current profiles
+      if (tab && tab.dataset.action === 'archive-now') {
+        tab.disabled = true;
+        tab.innerHTML = '⏳ Submitting to archive...';
+        const out = document.getElementById('wayback-archive-results');
+        try {
+          const res = await fetch(`${API}/analyse/${selectedId}/wayback/archive`, { method: 'POST' });
+          const json = await res.json();
+          if (json.success && json.data?.results) {
+            const rows = json.data.results.map(r => {
+              const icon = {instagram:'📸',tiktok:'🎵',facebook:'👥',linkedin:'💼'}[r.platform] || '📊';
+              const status = r.queued
+                ? `<span style="color:#16A34A;font-weight:600;">✓ Queued</span>`
+                : `<span style="color:#DC2626;font-weight:600;">✗ ${r.error || ('HTTP ' + r.status)}</span>`;
+              return `<div style="font-size:12px;margin:4px 0;">${icon} ${r.platform} → ${status}</div>`;
+            }).join('');
+            if (out) out.innerHTML = '<div style="padding:10px 14px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:12px;">Snapshots queued at ' + json.data.requestedAt.slice(11,19) + ' UTC. IA may take 1–5 min to make them visible in search.</div>' + rows;
+          } else {
+            if (out) out.innerHTML = `<div style="color:var(--status-bad);font-size:13px">Error: ${json.error || 'Unknown error'}</div>`;
+          }
+        } catch (err) {
+          if (out) out.innerHTML = `<div style="color:var(--status-bad);font-size:13px">Failed: ${err.message}</div>`;
+        }
+        tab.disabled = false;
+        tab.innerHTML = '💾 Archive now';
+        return;
+      }
+
       // Wayback Machine fetch
       if (tab && tab.dataset.action === 'fetch-wayback') {
         tab.disabled = true;
@@ -908,6 +1033,22 @@
             console.error('Failed to save marker:', err);
           }
         }
+        return;
+      }
+
+      // A9: One-click accept of an auto-detected spike suggestion
+      // Opens the marker form pre-filled with the suggested text + type.
+      const markerSuggest = e.target.closest('[data-marker-suggest]');
+      if (markerSuggest) {
+        const date = markerSuggest.dataset.markerSuggest;
+        const text = markerSuggest.dataset.markerSuggestText || '';
+        const type = markerSuggest.dataset.markerSuggestType || 'issue';
+        const form = document.getElementById('marker-form-' + date);
+        const textInput = document.getElementById('marker-text-' + date);
+        const typeSelect = document.getElementById('marker-type-' + date);
+        if (form) form.style.display = 'flex';
+        if (textInput) { textInput.value = text; textInput.focus(); textInput.select(); }
+        if (typeSelect) typeSelect.value = type;
         return;
       }
 
@@ -2033,12 +2174,13 @@
           fetchJSON(`/clients/${selectedId}/trends`).catch(() => null),
           fetchJSON(`/clients/${selectedId}/scrape-health`).catch(() => ({ perPlatform: {} })),
         ]);
-        // Fetch intelligence data + classifications (non-blocking)
-        const [intelData, classifications] = await Promise.all([
+        // Fetch intelligence data + classifications + content-clusters (non-blocking)
+        const [intelData, classifications, contentClusters] = await Promise.all([
           fetchJSON(`/intelligence/${selectedId}/overview`).catch(() => null),
           fetchJSON(`/clients/${selectedId}/classifications`).catch(() => []),
+          fetchJSON(`/clients/${selectedId}/content-clusters`).catch(() => ({ clusters: [] })),
         ]);
-        clientData = { metrics, history, posts, report, postTracker, analysis, competitors, competitorIntel, brandReport, tasks, markers, topicResearch, alerts, alertHistory, trends, intelData, scrapeHealth, classifications };
+        clientData = { metrics, history, posts, report, postTracker, analysis, competitors, competitorIntel, brandReport, tasks, markers, topicResearch, alerts, alertHistory, trends, intelData, scrapeHealth, classifications, contentClusters };
         // Update alert badge
         const alertCount = (alerts?.alerts || []).length;
         const badge = document.getElementById('alert-badge');

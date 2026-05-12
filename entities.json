@@ -1,0 +1,35 @@
+{
+  "_doc": "A14 entity model. Groups multi-brand clients under a single owning entity for roll-up dashboards. Each entry: { id, name, clients: [client-id, ...], role? }.",
+  "entities": [
+    {
+      "id": "balaji-prem-chand",
+      "name": "Balaji Prem Chand",
+      "role": "Founder, 3 physio clinics",
+      "clients": ["balaji-selfrunning-clinic", "balaji-heartland-rehab", "balaji-city-rehab"]
+    },
+    {
+      "id": "kevin-wee",
+      "name": "Kevin Wee",
+      "role": "Personal + secondary brand",
+      "clients": ["kevin-wee", "kevin-wee-radical-kindness"]
+    },
+    {
+      "id": "koocester-group",
+      "name": "Koocester",
+      "role": "Parent brand + 2 sub-verticals",
+      "clients": ["koocester", "koocester-business", "koocester-foodie"]
+    },
+    {
+      "id": "hae-group",
+      "name": "Hae Group",
+      "role": "Sister brands",
+      "clients": ["haemee-sg", "hae-claypot-sg"]
+    },
+    {
+      "id": "bainian-group",
+      "name": "Bainian Group",
+      "role": "Multi-outlet F&B",
+      "clients": ["bainian-food-court", "bainian-sg"]
+    }
+  ]
+}

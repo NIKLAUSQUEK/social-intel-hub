@@ -57,6 +57,38 @@ const DS = {
   brand: '#7C5CFC',
 };
 
+// ─── A12: Percentile + stats helpers (vs trailing window) ──────────
+// `computePercentile(value, series)` → 0–100 rank of value within sorted series.
+// `percentileBadge(pct)` → coloured pill HTML for the dashboard.
+// `meanStdev(arr)` → {mean, sd, n} for spike detection (A9).
+function computePercentile(value, series) {
+  if (value == null || !Array.isArray(series) || series.length === 0) return null;
+  const vals = series.filter(v => v != null && !isNaN(v)).sort((a, b) => a - b);
+  if (vals.length === 0) return null;
+  let below = 0;
+  for (const v of vals) { if (v < value) below++; }
+  return Math.round((below / vals.length) * 100);
+}
+function percentileBadge(pct, opts) {
+  if (pct == null) return '';
+  const o = opts || {};
+  const label = o.label || (pct >= 90 ? 'Top 10%' : pct >= 75 ? 'Top 25%' : pct >= 50 ? 'Above median' : pct >= 25 ? 'Below median' : 'Bottom 25%');
+  const colour = pct >= 75 ? '#22C55E' : pct >= 50 ? '#3B82F6' : pct >= 25 ? '#F59E0B' : '#EF4444';
+  const bg = colour + '15';
+  return '<span title="Ranked vs ' + (o.context || 'trailing 90 days') + '" style="display:inline-block; font-size:10px; font-weight:600; color:' + colour + '; background:' + bg + '; padding:1px 6px; border-radius:4px; margin-top:4px;">' + label + ' (' + pct + 'th)</span>';
+}
+function meanStdev(arr) {
+  const vals = (arr || []).filter(v => v != null && !isNaN(v));
+  const n = vals.length;
+  if (n === 0) return { mean: 0, sd: 0, n: 0 };
+  const mean = vals.reduce((s, v) => s + v, 0) / n;
+  const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / Math.max(1, n - 1);
+  return { mean, sd: Math.sqrt(variance), n };
+}
+window.computePercentile = computePercentile;
+window.percentileBadge = percentileBadge;
+window.meanStdev = meanStdev;
+
 // ─── Sparkline SVG helper ──────────
 function sparklineSvg(data, color, w, h) {
   w = w || 90; h = h || 28;
@@ -335,6 +367,9 @@ window.renderDataHub = function(d) {
         ? ((totalEng / pPosts.length) / followers * 100).toFixed(2)
         : pPosts.length > 0 ? '0.00' : '—',
       windowLabel,
+      // A12: per-post engagement series for percentile context on this platform
+      _postViewSeries: pPosts.map(p => p.views || 0).filter(v => v > 0),
+      _postEngSeries: pPosts.map(p => engScore(p)).filter(v => v > 0),
     });
   }
 
@@ -513,8 +548,8 @@ window.renderDataHub = function(d) {
         ${metricCard('Views', p.views, '👁', null, null, null, p.windowLabel || '')}
         ${metricCard('Engagement', p.engagement, '💬', null, null, null, p.windowLabel || '')}
         ${metricCard('Posts Scraped', p.contentPublished, '📱', null, null, null, p.windowLabel || '')}
-        ${metricCard('Avg Views/Post', p.avgViewsPerPost, '📊', null, null, null, p.windowLabel || '')}
-        ${metricCard('Avg Eng/Post', p.avgEngPerPost, '⚡', null, null, null, p.windowLabel || '')}
+        ${metricCard('Avg Views/Post', p.avgViewsPerPost, '📊', null, null, null, (p.windowLabel || '') + ' ' + percentileBadge(computePercentile(p.avgViewsPerPost, p._postViewSeries), { context: 'this account\'s own posts' }))}
+        ${metricCard('Avg Eng/Post', p.avgEngPerPost, '⚡', null, null, null, (p.windowLabel || '') + ' ' + percentileBadge(computePercentile(p.avgEngPerPost, p._postEngSeries), { context: 'this account\'s own posts' }))}
         ${metricCard('Eng Rate', p.engRate !== '—' ? p.engRate + '%' : '—', '📈', null, null, null, p.windowLabel || '')}
         ${metricCard('Total Posts', p.totalPosts, '📋', null, null, null, 'All-time')}
       </div>
@@ -1053,6 +1088,48 @@ window.renderDataHub = function(d) {
       return '<td style="' + DS.td + ' text-align:center; color:#94A3B8;">0</td>';
     }
 
+    // ── A9: precompute per-platform daily-delta series so we can detect spikes ──
+    // For each platform, walk sortedDates (newest→oldest) and build a sequential array
+    // of daily deltas. Then for each row index `i`, the "trailing 14 days" prior to it
+    // is sortedDates[i+1..i+14]. If row i's delta exceeds (mean + 2*sd) of that window,
+    // it's a candidate spike marker.
+    const deltaSeriesByPf = {};
+    for (const pfKey of activePfs) {
+      const getter = pfGetters[pfKey];
+      const seq = [];
+      for (let i = 0; i < sortedDates.length; i++) {
+        const cur = getter.get(byDate[sortedDates[i]]);
+        const prev = i + 1 < sortedDates.length ? getter.get(byDate[sortedDates[i + 1]]) : null;
+        seq.push((cur != null && prev != null) ? cur - prev : null);
+      }
+      deltaSeriesByPf[pfKey] = seq;
+    }
+    function spikeCandidates(rowIndex) {
+      // Returns array of {platform, delta, multiple, direction} for any platform that spikes at row i.
+      const out = [];
+      for (const pfKey of activePfs) {
+        const seq = deltaSeriesByPf[pfKey] || [];
+        const delta = seq[rowIndex];
+        if (delta == null || delta === 0) continue;
+        const window = seq.slice(rowIndex + 1, rowIndex + 15).filter(v => v != null);
+        if (window.length < 5) continue; // not enough history
+        const { mean, sd } = meanStdev(window);
+        if (sd === 0) continue;
+        const z = Math.abs(delta - mean) / sd;
+        if (z >= 2) {
+          out.push({
+            platform: pfKey,
+            delta,
+            z: +z.toFixed(2),
+            direction: delta > 0 ? 'up' : 'down',
+            color: pfGetters[pfKey].color,
+            label: pfGetters[pfKey].label,
+          });
+        }
+      }
+      return out;
+    }
+
     let tableRows = '';
     for (let i = 0; i < sortedDates.length; i++) {
       const dateKey = sortedDates[i];
@@ -1069,6 +1146,24 @@ window.renderDataHub = function(d) {
           + ' <span data-marker-delete="' + m.id + '" style="cursor:pointer; opacity:0.7; font-size:13px;" title="Delete marker">&times;</span>'
           + '</span>';
       }).join('');
+
+      // ── A9: surface spike candidates on the same row ──
+      // Only show if no human marker already exists for this date — don't nag.
+      if (dateMarkers.length === 0) {
+        const spikes = spikeCandidates(i);
+        if (spikes.length > 0) {
+          const spikePillHtml = spikes.map(s => {
+            const arrow = s.direction === 'up' ? '↑' : '↓';
+            const bg = s.direction === 'up' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)';
+            const fg = s.direction === 'up' ? '#16A34A' : '#DC2626';
+            const suggestedText = s.label + ' ' + arrow + ' ' + (s.delta > 0 ? '+' : '') + s.delta.toLocaleString() + ' (' + s.z + 'σ)';
+            return '<span data-marker-suggest="' + dateKey + '" data-marker-suggest-text="' + s.label + ' spike: ' + arrow + ' ' + s.delta + ' (' + s.z + 'σ)" data-marker-suggest-type="issue" style="display:inline-flex; align-items:center; gap:4px; background:' + bg + '; color:' + fg + '; padding:2px 8px; border-radius:12px; font-size:11px; margin:2px; white-space:nowrap; cursor:pointer; border:1px dashed ' + fg + '99;" title="Click to accept and label this auto-detected spike">'
+              + '🚨 ' + suggestedText + ' · click to label'
+              + '</span>';
+          }).join('');
+          markerPills += spikePillHtml;
+        }
+      }
 
       const bgColor = i % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
 
@@ -1142,10 +1237,14 @@ window.renderDataHub = function(d) {
       </div>
       <div id="wayback-container" style="${DS.card}">
         <button class="tab" data-action="fetch-wayback" style="${DS.btnPrimary}">
-          🔍 Search Wayback Machine
+          🔍 Search archive
         </button>
-        <span style="${DS.muted}; margin-left:12px;">Find archived versions of this client's social profiles</span>
+        <button class="tab" data-action="archive-now" style="${DS.btnSecondary}; margin-left:8px;" title="Save current profile pages to Internet Archive so history accumulates">
+          💾 Archive now
+        </button>
+        <span style="${DS.muted}; margin-left:12px;">Internet Archive snapshots — archive now to start the history, search later to see drift</span>
         <div id="wayback-results" style="margin-top:12px;"></div>
+        <div id="wayback-archive-results" style="margin-top:12px;"></div>
       </div>
     </div>
   `;
@@ -1241,11 +1340,58 @@ window.renderDataHub = function(d) {
       + '</div>';
   })();
 
+  // ── A11: Cross-platform content clusters ──
+  // Surfaces the same content idea posted across multiple platforms with
+  // a per-platform engagement multiplier so you can see, e.g., "IG carousel
+  // got 4× the engagement of the TT cut of this same story."
+  let clustersHtml = '';
+  (function buildClusters() {
+    const clusters = (d.contentClusters?.clusters || []).slice(0, 5);
+    if (clusters.length === 0) return;
+    const cards = clusters.map(c => {
+      const liftBadges = Object.entries(c.lifts || {}).map(([pf, mult]) => {
+        const colour = pf === c.dominantPlatform ? '#16A34A' : '#475569';
+        const bg = pf === c.dominantPlatform ? 'rgba(34,197,94,0.12)' : '#F1F5F9';
+        const icon = platformIcons[pf] || pf;
+        return '<span style="font-size:11px; font-weight:600; color:' + colour + '; background:' + bg + '; padding:2px 8px; border-radius:6px;">' + icon + ' ' + mult.toFixed(2) + '×</span>';
+      }).join(' ');
+      const postRows = c.posts.map(p => {
+        const colour = platformColors[p.platform] || '#94A3B8';
+        const icon = platformIcons[p.platform] || '';
+        const erText = p.er != null ? p.er.toFixed(2) + '% ER' : '—';
+        return '<div style="display:flex; gap:8px; align-items:center; padding:6px 0; border-top:1px solid #F1F5F9;">'
+          + '<span style="color:' + colour + '; font-weight:600; min-width:24px;">' + icon + '</span>'
+          + '<span style="' + DS.muted + '; min-width:80px;">' + fmtDate(p.date) + '</span>'
+          + '<span style="flex:1; font-size:12px; color:#475569; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + esc(p.caption) + '</span>'
+          + '<span style="' + DS.muted + ';">👁 ' + fmt(p.views) + '</span>'
+          + '<span style="' + DS.muted + ';">' + erText + '</span>'
+          + (p.url ? '<a href="' + safeHref(p.url) + '" target="_blank" rel="noopener" style="color:' + DS.brand + '; font-size:11px;">↗</a>' : '')
+          + '</div>';
+      }).join('');
+      return '<div style="' + DS.card + '; padding:16px 20px;">'
+        + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">'
+        + '<div style="font-size:13px; font-weight:600; color:#1E293B; flex:1;">' + esc(c.summary) + '</div>'
+        + '<div>' + liftBadges + '</div>'
+        + '</div>'
+        + '<div style="' + DS.muted + ';">' + c.postCount + ' posts · winner: ' + (platformIcons[c.dominantPlatform] || c.dominantPlatform) + ' (' + c.dominantMultiple.toFixed(2) + '× cluster median)</div>'
+        + postRows
+        + '</div>';
+    }).join('');
+    clustersHtml = '<div style="margin-bottom:24px;">'
+      + '<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">'
+      + '<h3 style="' + DS.sectionTitle + '; margin-bottom:0;">🔗 Cross-Platform Content Clusters</h3>'
+      + '<span style="' + DS.muted + '">Same idea posted across platforms — see which format wins</span>'
+      + '</div>'
+      + '<div style="display:flex; flex-direction:column; gap:10px;">' + cards + '</div>'
+      + '</div>';
+  })();
+
   return `
     <div style="padding:4px 0;">
       <h2 style="font-size:20px; font-weight:700; color:#1E293B; margin-bottom:20px;">📊 Data Hub</h2>
       ${summaryHtml}
       ${outliersHtml}
+      ${clustersHtml}
       ${platformCardsHtml}
       ${beforeAfterHtml}
       ${chartsHtml}
@@ -1350,6 +1496,136 @@ function postIdentityBadges(post, classByUrl) {
 window.postIdentityBadges = postIdentityBadges;
 window.inferFormatBrowser = inferFormatBrowser;
 window.shortFormatLabel = shortFormatLabel;
+
+// ═══════════════════════════════════════════════════
+// C1 — TAB: Hook Lab — Which opening hooks drive this client's biggest spikes
+// ═══════════════════════════════════════════════════
+// Uses the per-post classifications we built (hook_type, visual_style, retention)
+// + posts-latest engagement data to rank hook formulas by lift over the client's
+// own baseline. No LLM call needed at render time — all the labelling already
+// happened during scrape (auto-classify) or backfill.
+window.renderHookLab = function(d) {
+  // We can be called with either the full client data object or the intel-data
+  // sub-object. Try to normalise either way.
+  const classifications = d?.classifications || d?.classByUrl || [];
+  // Try to recover posts even when the caller only passed intelData
+  let postsObj = d?.posts?.platforms;
+  if (!postsObj && window._clientData?.posts?.platforms) postsObj = window._clientData.posts.platforms;
+  if (!postsObj) postsObj = {};
+
+  const classByUrl = {};
+  for (const c of (Array.isArray(classifications) ? classifications : [])) {
+    if (c.post_id) classByUrl[c.post_id] = c;
+    if (c.url) classByUrl[c.url] = c;
+  }
+
+  // Flatten posts + attach classification
+  const flat = [];
+  for (const [pf, arr] of Object.entries(postsObj)) {
+    if (!Array.isArray(arr)) continue;
+    for (const p of arr) {
+      const cls = classByUrl[p.url];
+      if (!cls?.hook_type || cls.hook_type === 'unknown') continue;
+      flat.push({
+        ...p,
+        platform: pf,
+        hook: cls.hook_type,
+        content: cls.content_type,
+        visual: cls.visual_style,
+        retention: cls.estimated_retention_pct,
+        eng: engScore(p),
+        er: (p.views > 0) ? (engScore(p) / p.views) * 100 : null,
+      });
+    }
+  }
+
+  if (flat.length === 0) {
+    return '<div style="padding:40px; ' + DS.muted + '; text-align:center;">No classified posts yet. Run scrape + classifier to surface hook patterns.</div>';
+  }
+
+  // Compute client baseline ER per platform (median of non-zero ER posts)
+  const erByPlatform = {};
+  for (const p of flat) {
+    if (p.er == null) continue;
+    if (!erByPlatform[p.platform]) erByPlatform[p.platform] = [];
+    erByPlatform[p.platform].push(p.er);
+  }
+  const baselineER = {};
+  for (const [pf, arr] of Object.entries(erByPlatform)) {
+    const sorted = [...arr].sort((a, b) => a - b);
+    baselineER[pf] = sorted[Math.floor(sorted.length / 2)] || 0;
+  }
+
+  // Aggregate by hook
+  const byHook = {};
+  for (const p of flat) {
+    if (!byHook[p.hook]) byHook[p.hook] = { posts: [], totalEng: 0, totalViews: 0, retentions: [], lifts: [] };
+    byHook[p.hook].posts.push(p);
+    byHook[p.hook].totalEng += p.eng;
+    byHook[p.hook].totalViews += (p.views || 0);
+    if (p.retention) byHook[p.hook].retentions.push(p.retention);
+    if (p.er != null && baselineER[p.platform] > 0) {
+      byHook[p.hook].lifts.push(p.er / baselineER[p.platform]);
+    }
+  }
+
+  const rows = Object.entries(byHook).map(([hook, g]) => {
+    const avgER = g.totalViews > 0 ? (g.totalEng / g.totalViews) * 100 : null;
+    const avgRetention = g.retentions.length > 0 ? (g.retentions.reduce((s, v) => s + v, 0) / g.retentions.length) : null;
+    const avgLift = g.lifts.length > 0 ? (g.lifts.reduce((s, v) => s + v, 0) / g.lifts.length) : null;
+    const best = [...g.posts].sort((a, b) => b.eng - a.eng)[0];
+    return {
+      hook,
+      count: g.posts.length,
+      avgER, avgRetention, avgLift,
+      best,
+    };
+  }).sort((a, b) => (b.avgLift || 0) - (a.avgLift || 0));
+
+  // Render
+  const hookLabel = (h) => h.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const cards = rows.map((r, idx) => {
+    const liftColour = r.avgLift > 1.2 ? '#16A34A' : r.avgLift > 0.8 ? '#3B82F6' : '#F59E0B';
+    const liftBg = liftColour + '15';
+    const liftText = r.avgLift != null ? r.avgLift.toFixed(2) + '× ER vs client baseline' : 'no view data';
+    const bestCaption = (r.best?.caption || '').slice(0, 160);
+    const bestPlatform = r.best?.platform || '';
+    const bestPlatformIcon = platformIcons[bestPlatform] || '';
+    const bestLink = r.best?.url ? '<a href="' + safeHref(r.best.url) + '" target="_blank" rel="noopener" style="color:' + DS.brand + ';font-size:11px;font-weight:600;">view ↗</a>' : '';
+    const retentionBadge = r.avgRetention != null ? '<span style="font-size:11px;color:#475569;background:#F1F5F9;padding:2px 8px;border-radius:6px;">' + r.avgRetention.toFixed(0) + '% retention</span>' : '';
+    const rankBadge = idx === 0 ? '<span style="font-size:10px;color:#16A34A;background:rgba(34,197,94,0.12);padding:2px 8px;border-radius:6px;font-weight:700;">🏆 TOP</span>' : '';
+    return '<div style="' + DS.card + ';">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;">'
+        + '<div style="flex:1;">'
+          + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+            + '<h4 style="font-size:15px;font-weight:700;color:#1E293B;margin:0;">' + esc(hookLabel(r.hook)) + '</h4>'
+            + rankBadge
+            + '<span style="' + DS.muted + ';">' + r.count + ' post' + (r.count !== 1 ? 's' : '') + '</span>'
+          + '</div>'
+          + '<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
+            + '<span style="font-size:12px;font-weight:600;color:' + liftColour + ';background:' + liftBg + ';padding:2px 8px;border-radius:6px;">' + liftText + '</span>'
+            + retentionBadge
+            + (r.avgER != null ? '<span style="' + DS.muted + ';">' + r.avgER.toFixed(2) + '% avg ER</span>' : '')
+          + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #F1F5F9;">'
+        + '<div style="' + DS.label + ';margin-bottom:4px;">Best example · ' + bestPlatformIcon + ' ' + esc(fmtDate(r.best?.date)) + '</div>'
+        + '<div style="font-size:13px;color:#475569;line-height:1.5;">' + esc(bestCaption) + (bestCaption.length >= 160 ? '…' : '') + '</div>'
+        + (bestLink ? '<div style="margin-top:6px;">' + bestLink + '</div>' : '')
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  return '<div style="padding:4px 0;">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      + '<h2 style="font-size:20px;font-weight:700;color:#1E293B;margin:0;">🎣 Hook Lab</h2>'
+      + '<span style="' + DS.muted + ';">Opening-hook formulas ranked by lift over this account\'s own baseline</span>'
+    + '</div>'
+    + '<div style="' + DS.muted + ';margin-bottom:20px;">Drawn from ' + flat.length + ' classified posts across all platforms. Higher lift = the hook pulls more engagement-per-view than this account\'s median post.</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;">' + cards + '</div>'
+    + '</div>';
+};
 
 window.renderContentLibrary = function(d) {
   // Build a URL→classification index once per render

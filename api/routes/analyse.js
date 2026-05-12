@@ -268,6 +268,112 @@ router.get('/:id', (req, res) => {
   }
 });
 
+// POST /api/analyse/:id/auto-proposal — C4: assemble a complete proposal JSON
+// Pulls brand report + classifications + outliers + clusters from disk, feeds the
+// PROMPT.md spec to the LLM, returns the JSON ready to paste into proposal-template.html.
+router.post('/:id/auto-proposal', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    const clientsPath = join(ROOT, 'clients.json');
+    const clientsCfg = JSON.parse(readFileSync(clientsPath, 'utf-8'));
+    const client = clientsCfg.clients.find(c => c.id === clientId);
+    if (!client) return res.status(404).json({ success: false, error: 'Client not found' });
+
+    const brandReport = readClientFile(clientId, 'brand-report-latest.json');
+    const posts = readClientFile(clientId, 'posts-latest.json');
+    const classifications = readClientFile(clientId, 'classifications.json');
+    if (!brandReport) return res.status(400).json({ success: false, error: 'Run brand-report first (POST /api/analyse/:id/brand-report)' });
+
+    // Compact the inputs so we don't blow the prompt budget
+    const compact = {
+      clientName: client.name,
+      industry: client.niche || 'Multi-platform creator',
+      handles: Object.fromEntries(
+        Object.entries(client.platforms || {}).map(([k, v]) => [k, v.url || v.handle || ''])
+      ),
+      brandReport: brandReport.structured || brandReport.data || brandReport,
+      topPostsByEng: (() => {
+        const flat = [];
+        for (const [pf, arr] of Object.entries(posts?.platforms || {})) {
+          for (const p of arr || []) flat.push({ ...p, platform: pf, _eng: (p.likes||0)+(p.comments||0)+(p.shares||0)+(p.saves||0) });
+        }
+        return flat.sort((a, b) => b._eng - a._eng).slice(0, 8).map(p => ({
+          platform: p.platform, url: p.url, caption: (p.caption || '').slice(0, 120),
+          views: p.views || 0, eng: p._eng, date: p.date,
+        }));
+      })(),
+      hookSummary: (() => {
+        const byHook = {};
+        for (const c of Array.isArray(classifications) ? classifications : []) {
+          if (!c?.hook_type) continue;
+          byHook[c.hook_type] = (byHook[c.hook_type] || 0) + 1;
+        }
+        return Object.entries(byHook).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      })(),
+    };
+
+    // Read the PROMPT.md spec so the LLM follows the exact schema
+    let proposalPrompt = '';
+    try {
+      proposalPrompt = readFileSync(join(ROOT, 'proposals', 'PROMPT.md'), 'utf-8');
+    } catch {}
+    if (!proposalPrompt) return res.status(500).json({ success: false, error: 'proposals/PROMPT.md not found' });
+
+    const fullPrompt =
+`${proposalPrompt}
+
+---
+
+CLIENT CONTEXT (real data from social-intel scrape + analysis):
+
+${JSON.stringify(compact, null, 2)}
+
+---
+
+Return ONLY the JSON. No markdown fences, no prose.`;
+
+    const raw = await callLLM(fullPrompt, 'auto-proposal', { tier: 'premium', maxTokens: 12000 });
+    const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    let structured;
+    try {
+      structured = JSON.parse(cleaned);
+    } catch (err) {
+      return res.status(500).json({ success: false, error: 'LLM returned non-JSON', raw: cleaned.slice(0, 500) });
+    }
+    res.json({ success: true, data: structured });
+  } catch (err) {
+    res.status(500).json({ success: false, error: safeError(err) });
+  }
+});
+
+// POST /api/analyse/:id/wayback/archive — A8: trigger Internet Archive "Save Page Now"
+// Schedules a fresh snapshot of each client profile URL so history accumulates
+// without waiting for the IA crawler. Free, no auth, rate-limited by IA.
+router.post('/:id/wayback/archive', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    const clientsPath = join(ROOT, 'clients.json');
+    const clients = JSON.parse(readFileSync(clientsPath, 'utf-8'));
+    const client = clients.clients.find(c => c.id === clientId);
+    if (!client) return res.status(404).json({ success: false, error: 'Client not found' });
+    const platforms = client.platforms || {};
+    const results = [];
+    for (const [pf, cfg] of Object.entries(platforms)) {
+      if (!cfg?.url) continue;
+      const savePageNow = 'https://web.archive.org/save/' + encodeURI(cfg.url);
+      try {
+        const r = await fetch(savePageNow, { method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(20000) });
+        results.push({ platform: pf, url: cfg.url, status: r.status, queued: r.status === 200 || r.status === 302 });
+      } catch (err) {
+        results.push({ platform: pf, url: cfg.url, error: err.message?.slice(0, 100), queued: false });
+      }
+    }
+    res.json({ success: true, data: { clientId, requestedAt: new Date().toISOString(), results } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: safeError(err) });
+  }
+});
+
 // GET /api/analyse/:id/wayback — fetch Wayback Machine snapshots for client profiles
 router.get('/:id/wayback', async (req, res) => {
   try {

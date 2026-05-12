@@ -71,6 +71,61 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// ── Dashboard scrape trigger ──
+// Same scraper invocation as the Make.com webhook, but auth-gated by either
+// localhost origin OR a session cookie. No external secret needed — agency
+// users running locally can fire scrapes from the UI button.
+// Job state persisted to memory so the dashboard can poll status.
+const _scrapeJobs = new Map(); // jobId -> { status, startedAt, finishedAt, clientId, stdout, stderr, error }
+
+function isLocalRequest(req) {
+  const ip = req.ip || req.connection?.remoteAddress || '';
+  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || ip.endsWith('127.0.0.1');
+}
+
+app.post('/api/scrape/run', (req, res) => {
+  if (!isLocalRequest(req) && req.headers['x-internal-key'] !== process.env.INTERNAL_API_KEY) {
+    return res.status(403).json({ success: false, error: 'Forbidden — local-only or INTERNAL_API_KEY required' });
+  }
+  const clientId = req.body?.clientId;
+  if (clientId && !validateClientId(clientId)) {
+    return res.status(400).json({ success: false, error: 'Invalid client ID' });
+  }
+  const ROOT = join(__dirname, '..');
+  const jobId = 'scrape-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  const job = { jobId, status: 'running', startedAt: new Date().toISOString(), clientId: clientId || null, stdout: '', stderr: '' };
+  _scrapeJobs.set(jobId, job);
+
+  const args = ['scraper/index.js'];
+  if (clientId) args.push('--client', clientId);
+  console.log(`[Dashboard scrape] Job ${jobId} started for ${clientId || 'ALL'}`);
+
+  const child = execFile('node', args, { cwd: ROOT, timeout: 900000, maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
+    job.stdout = stdout?.slice(-4000) || '';
+    job.stderr = stderr?.slice(-4000) || '';
+    job.finishedAt = new Date().toISOString();
+    job.status = err ? 'failed' : 'success';
+    if (err) job.error = err.message?.slice(0, 300);
+    console.log(`[Dashboard scrape] Job ${jobId} ${job.status}`);
+  });
+
+  // Stream incremental stdout (so the UI can show progress)
+  if (child.stdout) child.stdout.on('data', d => { job.stdout = (job.stdout + d.toString()).slice(-4000); });
+  if (child.stderr) child.stderr.on('data', d => { job.stderr = (job.stderr + d.toString()).slice(-4000); });
+
+  res.json({ success: true, data: { jobId, message: `Scrape queued for ${clientId || 'all clients'}` } });
+});
+
+// GET status of a scrape job
+app.get('/api/scrape/status/:jobId', (req, res) => {
+  if (!isLocalRequest(req) && req.headers['x-internal-key'] !== process.env.INTERNAL_API_KEY) {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  const job = _scrapeJobs.get(req.params.jobId);
+  if (!job) return res.status(404).json({ success: false, error: 'Job not found' });
+  res.json({ success: true, data: job });
+});
+
 // Webhook endpoint — triggered by Make.com to run scraper
 app.post('/api/webhook/scrape', (req, res) => {
   const { clientId, secret } = req.body;
@@ -117,26 +172,19 @@ app.use((err, req, res, _next) => {
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
-// ── Vercel compatibility ──
-// On Vercel the runtime calls our default export as an HTTP handler — no listen().
-// Locally (and anywhere else without process.env.VERCEL) we listen on PORT so
-// dev workflow stays unchanged.
-export default app;
-
-if (!process.env.VERCEL) {
-  function shutdown(signal) {
-    console.log(`\n[Server] ${signal} received — shutting down gracefully`);
-    server.close(() => {
-      console.log('[Server] Closed');
-      process.exit(0);
-    });
-    setTimeout(() => process.exit(1), 5000);
-  }
-
-  const server = app.listen(PORT, () => {
-    console.log(`Social Intel API running on http://localhost:${PORT}`);
+// Graceful shutdown
+function shutdown(signal) {
+  console.log(`\n[Server] ${signal} received — shutting down gracefully`);
+  server.close(() => {
+    console.log('[Server] Closed');
+    process.exit(0);
   });
-
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT', () => shutdown('SIGINT'));
+  setTimeout(() => process.exit(1), 5000);
 }
+
+const server = app.listen(PORT, () => {
+  console.log(`Social Intel API running on http://localhost:${PORT}`);
+});
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
