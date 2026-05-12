@@ -559,7 +559,11 @@
         if (activeTab === 'datahub') tabContent = window.renderDataHub ? window.renderDataHub(d) : renderOverview(d);
         else if (activeTab === 'library') tabContent = window.renderContentLibrary ? window.renderContentLibrary(d) : '<div class="muted">Content library not available.</div>';
         else if (activeTab === 'scorecard') tabContent = window.renderScorecard ? window.renderScorecard(d) : '<div class="muted">Scorecard not available.</div>';
-        else if (activeTab === 'strategy') tabContent = window.renderStrategyTasks ? window.renderStrategyTasks(d, selectedId) : '<div class="muted">Strategy not available.</div>';
+        else if (activeTab === 'strategy') {
+          tabContent = window.renderStrategyTasks ? window.renderStrategyTasks(d, selectedId) : '<div class="muted">Strategy not available.</div>';
+          // C3: hydrate niche leaderboard after render
+          setTimeout(() => window.hydrateNicheLeaderboard?.(selectedId), 50);
+        }
         else if (activeTab === 'report') tabContent = renderReport(d);
         else if (activeTab === 'analysis') tabContent = renderAnalysis(d);
         else if (activeTab === 'notifications') tabContent = window.renderNotifications ? window.renderNotifications(d, selectedId) : '<div class="muted">Notifications not available.</div>';

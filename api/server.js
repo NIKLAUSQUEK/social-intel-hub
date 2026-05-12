@@ -177,5 +177,40 @@ const server = app.listen(PORT, () => {
   console.log(`Social Intel API running on http://localhost:${PORT}`);
 });
 
+// ── A8 + scheduler: register recurring tasks ──
+// Wayback weekly archive (every active client) + niche baselines daily refresh.
+(async () => {
+  if (process.env.VERCEL) return;
+  try {
+    const { registerTask, startScheduler } = await import('./lib/scheduler.js');
+
+    registerTask('wayback-weekly-archive', 7 * 24 * 3600 * 1000, async () => {
+      console.log('[scheduler] wayback-weekly-archive starting');
+      const { readFileSync } = await import('fs');
+      const cfg = JSON.parse(readFileSync(join(__dirname, '..', 'clients.json'), 'utf-8'));
+      for (const c of cfg.clients || []) {
+        if (!c.active) continue;
+        try {
+          await fetch(`http://localhost:${PORT}/api/analyse/${c.id}/wayback/archive`, { method: 'POST' });
+          await new Promise(r => setTimeout(r, 1500));
+        } catch (err) {
+          console.error(`[scheduler] wayback for ${c.id} failed:`, err.message?.slice(0, 100));
+        }
+      }
+      console.log('[scheduler] wayback-weekly-archive complete');
+    });
+
+    registerTask('niche-baselines-refresh', 24 * 3600 * 1000, async () => {
+      const { computeNicheBaselines } = await import('./lib/niche-baselines.js');
+      computeNicheBaselines({ force: true });
+      console.log('[scheduler] niche-baselines-refresh complete');
+    });
+
+    startScheduler();
+  } catch (err) {
+    console.error('[scheduler] failed to start:', err.message);
+  }
+})();
+
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));

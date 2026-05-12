@@ -3284,6 +3284,17 @@ window.renderStrategyTasks = function(d, selectedId) {
       ${renderDocumentsSection(structuredTasks.documents || [])}
       ${renderActionablesSection(structuredTasks.actionables || [])}
 
+      <!-- C3: Niche Leaderboard — your stats vs every other client in your niche -->
+      <div style="margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          <h3 style="${DS.sectionTitle}; margin-bottom:0;">🏆 Niche Leaderboard</h3>
+          <span style="${DS.muted}">You vs other clients in your niche (28-day window)</span>
+        </div>
+        <div id="niche-leaderboard" style="${DS.card};">
+          <div style="${DS.muted}; padding:8px;">Loading leaderboard…</div>
+        </div>
+      </div>
+
       <!-- Growth Goals -->
       <div style="margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
@@ -3334,6 +3345,47 @@ window.renderStrategyTasks = function(d, selectedId) {
       </div>
     </div>
   `;
+};
+
+// ── C3 Leaderboard hydrator ──
+// Called after renderStrategyTasks returns its HTML; fetches the leaderboard
+// data + paints into #niche-leaderboard.
+window.hydrateNicheLeaderboard = async function(selectedId) {
+  const el = document.getElementById('niche-leaderboard');
+  if (!el) return;
+  try {
+    const r = await fetch(window.location.origin + '/api/clients/' + selectedId + '/leaderboard');
+    const j = await r.json();
+    if (!j.success) { el.innerHTML = '<div style="' + DS.muted + ';">' + (j.error || 'no data') + '</div>'; return; }
+    const { niche, board, sampleSizes } = j.data;
+    if (!board.length) { el.innerHTML = '<div style="' + DS.muted + ';">No niche peers tracked yet.</div>'; return; }
+    const rankBadge = (you, p50, p90) => {
+      if (you == null || p50 == null) return '<span style="' + DS.muted + ';">no peer data</span>';
+      if (you >= p90) return '<span style="font-size:11px;font-weight:700;color:#16A34A;background:rgba(34,197,94,0.12);padding:2px 8px;border-radius:6px;">🏆 Top 10%</span>';
+      if (you >= p50) return '<span style="font-size:11px;font-weight:700;color:#3B82F6;background:rgba(59,130,246,0.12);padding:2px 8px;border-radius:6px;">Above median</span>';
+      return '<span style="font-size:11px;font-weight:700;color:#F59E0B;background:rgba(245,158,11,0.12);padding:2px 8px;border-radius:6px;">Below median</span>';
+    };
+    const fmtNum = (v, suffix) => {
+      if (v == null || isNaN(v)) return '—';
+      const s = v >= 100 ? Math.round(v).toLocaleString() : v.toFixed(2);
+      return s + (suffix || '');
+    };
+    const rows = board.map(b => {
+      const icon = platformIcons[b.platform] || '📊';
+      return '<tr>'
+        + '<td style="padding:8px 12px; font-weight:600;">' + icon + ' ' + b.platform + '</td>'
+        + '<td style="padding:8px 12px;">' + fmtNum(b.postsPerWeek.you) + '/wk vs niche median ' + fmtNum(b.postsPerWeek.niche_median) + ' (top 10% ' + fmtNum(b.postsPerWeek.niche_p90) + ') ' + rankBadge(b.postsPerWeek.you, b.postsPerWeek.niche_median, b.postsPerWeek.niche_p90) + '</td>'
+        + '<td style="padding:8px 12px;">' + fmtNum(b.engRate.you, '%') + ' vs niche median ' + fmtNum(b.engRate.niche_median, '%') + ' (top 10% ' + fmtNum(b.engRate.niche_p90, '%') + ') ' + rankBadge(b.engRate.you, b.engRate.niche_median, b.engRate.niche_p90) + '</td>'
+        + '<td style="padding:8px 12px;">' + fmtNum(b.followers.you) + ' vs niche median ' + fmtNum(b.followers.niche_median) + ' (top 10% ' + fmtNum(b.followers.niche_p90) + ') ' + rankBadge(b.followers.you, b.followers.niche_median, b.followers.niche_p90) + '</td>'
+        + '</tr>';
+    }).join('');
+    el.innerHTML = '<div style="' + DS.muted + '; margin-bottom:8px;">Niche: <strong style="color:#1E293B;">' + niche + '</strong> · ' + (sampleSizes.clientsInNiche || 0) + ' clients sampled</div>'
+      + '<div style="overflow-x:auto;"><table style="width:100%; font-size:12px; border-collapse:collapse;">'
+      + '<thead><tr><th style="' + DS.th + '">Platform</th><th style="' + DS.th + '">Posts/week</th><th style="' + DS.th + '">Eng Rate</th><th style="' + DS.th + '">Followers</th></tr></thead>'
+      + '<tbody>' + rows + '</tbody></table></div>';
+  } catch (err) {
+    el.innerHTML = '<div style="' + DS.muted + '; color:#DC2626;">Failed: ' + err.message + '</div>';
+  }
 };
 
 // ── Structured section renderer (Goals, Strategy, Filming Style) ──

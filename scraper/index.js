@@ -661,12 +661,32 @@ async function main() {
   console.log(`Mode: ${mode.toUpperCase()} ${mode === 'weekly' ? '(SocialKit API for IG)' : '(Playwright only — free)'}`);
   console.log(`Clients to scrape: ${activeClients.map((c) => c.name).join(', ')}`);
 
-  const browser = await chromium.launch({ headless: true });
+  // ── B5: anti-detection hardening ──
+  // - Optional proxy via SCRAPER_PROXY env (e.g. http://user:pass@host:port)
+  // - Optional headful via SCRAPER_HEADFUL=1 (browser-like)
+  // - Realistic user agent + viewport
+  // - Per-client jitter between scrapes so we don't hammer at fixed cadence
+  const launchOpts = { headless: process.env.SCRAPER_HEADFUL !== '1' };
+  if (process.env.SCRAPER_PROXY) {
+    launchOpts.proxy = { server: process.env.SCRAPER_PROXY };
+    console.log(`[B5] Using proxy: ${process.env.SCRAPER_PROXY.replace(/\/\/[^@]+@/, '//***@')}`);
+  }
+  const browser = await chromium.launch(launchOpts);
+
+  // Jitter helper — randomise 0.5x to 1.5x of base wait
+  const jitter = (baseMs) => baseMs * (0.5 + Math.random());
 
   const results = [];
   try {
-    for (const client of activeClients) {
+    for (let i = 0; i < activeClients.length; i++) {
+      const client = activeClients[i];
       try {
+        // B5: jitter between clients to avoid fixed-cadence pattern (range 8-22s)
+        if (i > 0) {
+          const wait = Math.round(jitter(15000));
+          console.log(`  [B5] jitter pause ${wait}ms before next client`);
+          await new Promise(r => setTimeout(r, wait));
+        }
         const report = await scrapeClient(browser, client, { mode });
         results.push(report);
       } catch (err) {

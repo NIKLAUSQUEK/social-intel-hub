@@ -111,6 +111,57 @@ router.get('/:id/posts', (req, res) => {
   }
 });
 
+// GET /api/clients/niche-baselines — A12 + C3 cross-client baselines
+router.get('/niche-baselines', (req, res) => {
+  try {
+    import('../lib/niche-baselines.js').then(({ computeNicheBaselines }) => {
+      const out = computeNicheBaselines({ force: req.query.force === '1' });
+      res.json({ success: true, data: out });
+    }).catch(err => res.status(500).json({ success: false, error: safeError(err) }));
+  } catch (err) {
+    res.status(500).json({ success: false, error: safeError(err) });
+  }
+});
+
+// GET /api/clients/:id/leaderboard — C3 gamified ranking vs niche
+router.get('/:id/leaderboard', async (req, res) => {
+  try {
+    const { computeNicheBaselines, nicheFor } = await import('../lib/niche-baselines.js');
+    const cfg = JSON.parse(readFileSync(join(ROOT, 'clients.json'), 'utf-8'));
+    const client = cfg.clients.find(c => c.id === req.params.id);
+    if (!client) return res.status(404).json({ success: false, error: 'Client not found' });
+    const niche = nicheFor(client);
+    const baselines = computeNicheBaselines({}).niches?.[niche]?.platforms || {};
+
+    // Build the client's own per-platform stats
+    const posts = readClientFile(req.params.id, 'posts-latest.json');
+    const metrics = readClientFile(req.params.id, 'metrics-latest.json');
+    const board = [];
+    const cutoff = Date.now() - 28 * 86400000;
+    for (const pf of Object.keys(baselines)) {
+      const platformPosts = posts?.platforms?.[pf] || [];
+      const recent = platformPosts.filter(p => {
+        const d = p.date ? new Date(p.date) : null;
+        return d && d.getTime() > cutoff;
+      });
+      const myPostsPerWeek = (recent.length / 28) * 7;
+      const ers = platformPosts.filter(p => (p.views || 0) > 0)
+        .map(p => (((p.likes||0)+(p.comments||0)+(p.shares||0)+(p.saves||0)) / p.views) * 100);
+      const myEngRate = ers.length ? ers.reduce((s, v) => s + v, 0) / ers.length : 0;
+      const myFollowers = metrics?.platforms?.[pf]?.followers || metrics?.platforms?.[pf]?.pageLikes || 0;
+      board.push({
+        platform: pf,
+        postsPerWeek: { you: +myPostsPerWeek.toFixed(2), niche_median: baselines[pf].postsPerWeek_median, niche_p90: baselines[pf].postsPerWeek_p90 },
+        engRate: { you: +myEngRate.toFixed(2), niche_median: baselines[pf].engRate_median, niche_p90: baselines[pf].engRate_p90 },
+        followers: { you: myFollowers, niche_median: baselines[pf].followers_median, niche_p90: baselines[pf].followers_p90 },
+      });
+    }
+    res.json({ success: true, data: { clientId: req.params.id, niche, board, sampleSizes: { clientsInNiche: (await import('../lib/niche-baselines.js')).computeNicheBaselines({}).niches?.[niche]?.clientCount || 0 } } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: safeError(err) });
+  }
+});
+
 // GET /api/clients/freshness/all — A15 portfolio-wide scrape freshness audit
 // Returns every client's last successful scrape per platform, flags any that
 // have missed their SLA (default 7 days; override per client via clients.json `scrapeCadenceDays`).
