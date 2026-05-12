@@ -1189,13 +1189,17 @@ window.renderDataHub = function(d) {
         pfCells += deltaCell(val, prevVal);
       }
 
-      tableRows += '<tr style="background:' + bgColor + ';">'
+      // A9 cleanup: hide the bare "+" button when row has no markers AND no spike.
+      // Show on hover via CSS class. Reduces visual noise (was 40 dead buttons per page).
+      const hasContent = markerPills.length > 0;
+      const addBtn = '<span data-marker-toggle="' + dateKey + '" class="marker-add-btn" style="cursor:pointer;' + DS.btnSecondary + ';padding:2px 8px;font-size:12px;border-radius:12px;opacity:' + (hasContent ? '1' : '0') + ';transition:opacity 0.15s;" title="Add marker">+</span>';
+      tableRows += '<tr class="timeline-row" style="background:' + bgColor + ';">'
         + '<td style="' + DS.td + ' white-space:nowrap; font-weight:500; color:#1E293B;">' + fmtDate(dateKey) + '</td>'
         + pfCells
         + '<td style="' + DS.td + ' min-width:200px;">'
           + '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:2px;">'
           + markerPills
-          + '<span data-marker-toggle="' + dateKey + '" style="cursor:pointer; ' + DS.btnSecondary + '; padding:2px 8px; font-size:12px; border-radius:12px;" title="Add marker">+</span>'
+          + addBtn
           + '</div>'
           + '<div id="marker-form-' + dateKey + '" style="display:none; gap:6px; align-items:center; margin-top:6px; flex-wrap:wrap;">'
             + '<input id="marker-text-' + dateKey + '" type="text" placeholder="Note..." style="flex:1; min-width:120px; ' + DS.input + '; font-size:12px; padding:4px 8px;">'
@@ -1327,6 +1331,7 @@ window.renderDataHub = function(d) {
       if (cls?.hook_type) why.push('hook: ' + cls.hook_type.replace(/[-_]/g,' '));
       if (cls?.content_type) why.push('topic: ' + cls.content_type.replace(/[-_]/g,' '));
       const whyLine = why.length ? '<div style="' + DS.muted + '; font-size:11px; margin-top:4px;">' + why.join(' · ') + '</div>' : '';
+      const whyId = 'why-' + Math.random().toString(36).slice(2, 8);
       return '<div style="' + DS.card + '; border-left:4px solid ' + platformColor + ';">'
         + '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">'
         + '<div style="flex:1;">'
@@ -1334,12 +1339,16 @@ window.renderDataHub = function(d) {
         + idBadges
         + '<div style="font-size:13px; color:#1E293B; line-height:1.4; margin-top:6px;">' + (captionShort || '—') + (captionShort.length >= 100 ? '…' : '') + '</div>'
         + whyLine
+        + '<div id="' + whyId + '" style="margin-top:8px;"></div>'
         + '</div>'
         + '<div style="text-align:right; min-width:90px;">'
         + '<div style="font-size:18px; font-weight:800; color:#1E293B;">' + fmt(p._eng) + '</div>'
         + '<div style="' + DS.label + '">vs ' + fmt(Math.round(p._baseline)) + ' med.</div>'
         + '</div></div>'
-        + (p.url ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:' + DS.brand + '; text-decoration:none; font-size:12px; font-weight:600; margin-top:8px; display:inline-block;">View post ↗</a>' : '')
+        + '<div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">'
+        + (p.url ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:' + DS.brand + '; text-decoration:none; font-size:12px; font-weight:600;">View post ↗</a>' : '')
+        + '<button type="button" data-why-worked="' + encodeURIComponent(p.url || '') + '" data-why-target="' + whyId + '" style="background:none;border:1px solid #E2E8F0;color:#475569;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">✦ Why this worked</button>'
+        + '</div>'
         + '</div>';
     }).join('');
 

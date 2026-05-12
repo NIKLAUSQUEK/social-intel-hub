@@ -121,6 +121,8 @@
       align-items: center;
       gap: 16px;
     }
+    /* A9 cleanup: reveal the Add-marker + button on row hover */
+    .timeline-row:hover .marker-add-btn { opacity: 1 !important; }
     .last-scrape-badge {
       font-size: 11px;
       font-weight: 500;
@@ -581,12 +583,21 @@
               style="padding:6px 14px;font-size:12px;font-weight:600;border-radius:8px;background:#fff;color:#475569;border:1px solid #E2E8F0;cursor:pointer;">
               📄 Generate proposal
             </button>
+            <button id="gen-proposal-pdf-btn" data-action="gen-proposal-pdf" title="Auto-generate the proposal and download as PDF (~60s)"
+              style="padding:6px 14px;font-size:12px;font-weight:600;border-radius:8px;background:#fff;color:#475569;border:1px solid #E2E8F0;cursor:pointer;">
+              📑 Proposal PDF
+            </button>
             ${clients.length > 0 ? `
-              <div class="client-pill">
+              <div class="client-pill" id="client-picker-pill" style="position:relative;">
                 <div class="client-avatar">${client ? getInitials(client.name) : '?'}</div>
-                <select id="client-select">
-                  ${clients.map(c => `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.name}</option>`).join('')}
-                </select>
+                <button id="client-picker-btn" type="button" style="background:none;border:none;font-size:14px;font-weight:600;color:#1E293B;cursor:pointer;padding:4px 10px;display:flex;align-items:center;gap:6px;">
+                  ${client ? client.name : 'Select client'}
+                  <span style="font-size:10px;color:#94A3B8;">▾</span>
+                </button>
+                <div id="client-picker-menu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;width:340px;max-height:520px;background:#fff;border:1px solid #E2E8F0;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,0.12);overflow:hidden;z-index:200;">
+                  <input id="client-picker-search" type="text" placeholder="Search 49 clients…" style="width:100%;padding:12px 14px;border:none;border-bottom:1px solid #F1F5F9;font-size:13px;outline:none;font-family:inherit;">
+                  <div id="client-picker-list" style="max-height:460px;overflow-y:auto;padding:6px 0;"></div>
+                </div>
               </div>
             ` : ''}
           </div>
@@ -677,6 +688,36 @@
         }
         return;
       }
+      // C2: Why this worked — synthesise a 3-sentence explanation for an outlier post
+      const whyBtn = e.target.closest('[data-why-worked]');
+      if (whyBtn) {
+        const url = decodeURIComponent(whyBtn.dataset.whyWorked);
+        const target = document.getElementById(whyBtn.dataset.whyTarget);
+        whyBtn.disabled = true;
+        whyBtn.innerHTML = '⏳ Thinking…';
+        try {
+          const r = await fetch(`${API}/analyse/${selectedId}/why-this-worked`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url }),
+          });
+          const j = await r.json();
+          if (j.success && j.data?.narrative) {
+            target.innerHTML = '<div style="background:#FAFAFC;border:1px solid #F1F5F9;border-left:3px solid #7C5CFC;border-radius:8px;padding:10px 14px;font-size:12px;line-height:1.6;color:#334155;">' + j.data.narrative.replace(/\n/g, '<br>') + '</div>';
+            whyBtn.style.display = 'none';
+          } else {
+            target.innerHTML = '<div style="color:#DC2626;font-size:11px;">Failed: ' + (j.error || 'no narrative') + '</div>';
+            whyBtn.disabled = false;
+            whyBtn.innerHTML = '✦ Why this worked';
+          }
+        } catch (err) {
+          target.innerHTML = '<div style="color:#DC2626;font-size:11px;">Error: ' + err.message + '</div>';
+          whyBtn.disabled = false;
+          whyBtn.innerHTML = '✦ Why this worked';
+        }
+        return;
+      }
+
       // Run scraper from the dashboard (replaces "ask Claude Code to run it")
       if (tab && tab.dataset.action === 'scrape-now') {
         const btn = tab;
@@ -727,6 +768,37 @@
           btn.disabled = false;
           btn.innerHTML = '🔄 Scrape now';
         }
+        return;
+      }
+
+      // C4 PDF: full server-side render via Playwright → download .pdf
+      if (tab && tab.dataset.action === 'gen-proposal-pdf') {
+        const btn = tab;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Rendering PDF…';
+        const status = document.getElementById('scrape-status');
+        if (status) { status.style.display = 'block'; status.textContent = '⏳ Generating + rendering proposal PDF for ' + selectedId + '. ~60-90s…'; }
+        try {
+          const res = await fetch(`${API}/analyse/${selectedId}/proposal-pdf`, { method: 'POST' });
+          if (!res.ok) {
+            const txt = await res.text();
+            throw new Error('Server: ' + txt.slice(0, 200));
+          }
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `proposal-${selectedId}-${new Date().toISOString().slice(0,10)}.pdf`;
+          a.click();
+          URL.revokeObjectURL(url);
+          if (status) status.innerHTML = '<div style="font-weight:700;">✓ PDF downloaded</div>';
+          setTimeout(() => { if (status) status.style.display = 'none'; }, 5000);
+        } catch (err) {
+          if (status) status.innerHTML = '<div style="font-weight:700;color:#FCA5A5;">✗ ' + err.message + '</div>';
+          setTimeout(() => { if (status) status.style.display = 'none'; }, 10000);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '📑 Proposal PDF';
         return;
       }
 
@@ -1114,6 +1186,157 @@
       if (e.target.id === 'client-select') {
         selectedId = e.target.value;
         loadClient();
+      }
+    });
+
+    // ─── A13 + A14: searchable, grouped client picker with entity roll-ups ───
+    const RECENT_KEY = 'titan-recent-clients';
+    function recentClientIds() {
+      try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
+    }
+    function pushRecentClient(id) {
+      try {
+        const arr = recentClientIds().filter(x => x !== id);
+        arr.unshift(id);
+        localStorage.setItem(RECENT_KEY, JSON.stringify(arr.slice(0, 5)));
+      } catch {}
+    }
+    let _entitiesCache = null;
+    async function loadEntities() {
+      if (_entitiesCache) return _entitiesCache;
+      try {
+        const r = await fetch(`${API}/clients/entities/list`);
+        const j = await r.json();
+        _entitiesCache = (j.success && j.data?.entities) || [];
+      } catch { _entitiesCache = []; }
+      return _entitiesCache;
+    }
+    function nicheBucket(niche) {
+      const n = (niche || '').toLowerCase();
+      if (/fnb|food|claypot|hawker|coffee|restaurant|kitchen|bain|hae|peng|baozai|shinian/.test(n)) return 'F&B';
+      if (/fitness|coach|wellness|rehab|physio|clinic|health|gym/.test(n)) return 'Health & Wellness';
+      if (/property|invest|finance|wealth|business|founder|entrepreneur|growth/.test(n)) return 'Business & Finance';
+      if (/educ|teach|tuition|course|learn|tutor/.test(n)) return 'Education';
+      if (/podcast|content|creator|media|influencer/.test(n)) return 'Creator / Media';
+      if (/politic|policy|mp|leong/.test(n)) return 'Politics & Civic';
+      return 'Other';
+    }
+    async function renderClientPicker() {
+      const menu = document.getElementById('client-picker-menu');
+      const list = document.getElementById('client-picker-list');
+      const input = document.getElementById('client-picker-search');
+      if (!menu || !list || !input) return;
+      const entities = await loadEntities();
+      const entityByClient = {};
+      for (const e of entities) {
+        for (const c of (e.clients || [])) entityByClient[c.id] = e;
+      }
+
+      function paint(filter) {
+        const q = (filter || '').toLowerCase().trim();
+        const recent = recentClientIds();
+        const matches = clients.filter(c =>
+          c.active !== false &&
+          (!q || c.name.toLowerCase().includes(q) || c.id.includes(q) || (c.niche || '').toLowerCase().includes(q))
+        );
+        if (matches.length === 0) {
+          list.innerHTML = '<div style="padding:24px;text-align:center;color:#94A3B8;font-size:13px;">No matches</div>';
+          return;
+        }
+
+        // Sections: Recent → Entities (multi-brand groups) → By niche
+        const sections = [];
+        if (!q && recent.length > 0) {
+          const recentMatches = recent.map(id => matches.find(c => c.id === id)).filter(Boolean);
+          if (recentMatches.length > 0) sections.push({ title: '🕘 Recent', items: recentMatches });
+        }
+        // Entity roll-ups (only show when no search query)
+        if (!q && entities.length > 0) {
+          const entityItems = entities.map(e => ({
+            __entity: true,
+            id: 'entity-' + e.id,
+            name: e.name,
+            sub: e.role + ' · ' + e.clients.length + ' brands · ' + e.clients.reduce((s, c) => s + (c.totalFollowers || 0), 0).toLocaleString() + ' total followers',
+            clients: e.clients,
+          }));
+          sections.push({ title: '👥 Entity roll-ups', items: entityItems });
+        }
+        // Buckets
+        const buckets = {};
+        for (const c of matches) {
+          const key = entityByClient[c.id] ? null : nicheBucket(c.niche);
+          if (!key) continue; // members of entities shown under the entity, not duplicated
+          if (!buckets[key]) buckets[key] = [];
+          buckets[key].push(c);
+        }
+        const bucketOrder = ['F&B', 'Health & Wellness', 'Business & Finance', 'Education', 'Creator / Media', 'Politics & Civic', 'Other'];
+        for (const k of bucketOrder) {
+          if (buckets[k]?.length) sections.push({ title: k, items: buckets[k] });
+        }
+
+        list.innerHTML = sections.map(sec => {
+          const items = sec.items.map(item => {
+            if (item.__entity) {
+              // Entity row — expandable list of member clients
+              const memberRows = item.clients.map(c =>
+                `<button type="button" data-client-pick="${c.id}" style="display:flex;width:100%;align-items:center;gap:8px;padding:6px 14px 6px 30px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;color:#475569;font-family:inherit;">
+                  ${c.name}
+                  <span style="margin-left:auto;font-size:10px;color:#94A3B8;">${(c.totalFollowers || 0).toLocaleString()}</span>
+                </button>`
+              ).join('');
+              return `<div style="margin-bottom:4px;">
+                <div style="padding:6px 14px;font-weight:600;font-size:13px;color:#1E293B;background:#FAFAFC;">${item.name}<div style="font-size:10px;color:#94A3B8;font-weight:400;margin-top:2px;">${item.sub}</div></div>
+                ${memberRows}
+              </div>`;
+            }
+            const selected = item.id === selectedId;
+            const bg = selected ? '#F0EDFF' : 'transparent';
+            const niche = item.niche ? `<span style="font-size:10px;color:#94A3B8;margin-left:6px;">${item.niche.slice(0, 32)}</span>` : '';
+            return `<button type="button" data-client-pick="${item.id}" style="display:flex;width:100%;align-items:center;gap:8px;padding:8px 14px;border:none;background:${bg};cursor:pointer;text-align:left;font-size:13px;color:#1E293B;font-family:inherit;">
+              ${item.name}${niche}
+            </button>`;
+          }).join('');
+          return `<div style="margin-bottom:6px;">
+            <div style="font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;padding:8px 14px 4px;">${sec.title}</div>
+            ${items}
+          </div>`;
+        }).join('');
+      }
+      paint('');
+      input.oninput = (ev) => paint(ev.target.value);
+    }
+
+    // Event delegation for the picker
+    document.getElementById('app').addEventListener('click', (e) => {
+      const btn = e.target.closest('#client-picker-btn');
+      if (btn) {
+        const menu = document.getElementById('client-picker-menu');
+        const isOpen = menu.style.display === 'block';
+        menu.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+          renderClientPicker();
+          setTimeout(() => document.getElementById('client-picker-search')?.focus(), 50);
+        }
+        e.stopPropagation();
+        return;
+      }
+      const pick = e.target.closest('[data-client-pick]');
+      if (pick) {
+        selectedId = pick.dataset.clientPick;
+        pushRecentClient(selectedId);
+        const menu = document.getElementById('client-picker-menu');
+        if (menu) menu.style.display = 'none';
+        loadClient();
+        e.stopPropagation();
+        return;
+      }
+    });
+    // Close picker on outside click
+    document.addEventListener('click', (e) => {
+      const pill = document.getElementById('client-picker-pill');
+      if (pill && !pill.contains(e.target)) {
+        const menu = document.getElementById('client-picker-menu');
+        if (menu) menu.style.display = 'none';
       }
     });
 

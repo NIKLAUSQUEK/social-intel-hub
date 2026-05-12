@@ -268,6 +268,126 @@ router.get('/:id', (req, res) => {
   }
 });
 
+// POST /api/analyse/:id/proposal-pdf — C4: render a full PDF proposal end-to-end
+// 1. Generate the JSON via the auto-proposal pipeline
+// 2. Read proposals/proposal-template.html
+// 3. Inject the JSON into window.PROPOSAL_DATA
+// 4. Render to PDF via Playwright
+// 5. Stream the PDF back to the client
+router.post('/:id/proposal-pdf', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+
+    // Build the proposal JSON by reusing the auto-proposal logic
+    const port = process.env.PORT || 3099;
+    const proposalRes = await fetch(`http://localhost:${port}/api/analyse/${clientId}/auto-proposal`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+      signal: AbortSignal.timeout(180_000),
+    });
+    const proposalJson = await proposalRes.json();
+    if (!proposalJson.success) {
+      return res.status(500).json({ success: false, error: 'auto-proposal failed: ' + (proposalJson.error || 'unknown') });
+    }
+
+    // Inject + render
+    const templatePath = join(ROOT, 'proposals', 'proposal-template.html');
+    let template;
+    try { template = readFileSync(templatePath, 'utf-8'); }
+    catch (err) { return res.status(500).json({ success: false, error: 'proposal template not found' }); }
+    const merged = template.replace(
+      /window\.PROPOSAL_DATA\s*=\s*\{[\s\S]*?\n\};/m,
+      'window.PROPOSAL_DATA = ' + JSON.stringify(proposalJson.data, null, 2) + ';'
+    );
+
+    // Playwright print to PDF
+    let browser;
+    try {
+      const { chromium } = await import('playwright');
+      browser = await chromium.launch({ headless: true });
+      const ctx = await browser.newContext();
+      const page = await ctx.newPage();
+      await page.setContent(merged, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(800); // give font + reveal animations a moment
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '12mm', bottom: '12mm', left: '10mm', right: '10mm' },
+      });
+      await browser.close();
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="proposal-${clientId}-${new Date().toISOString().slice(0,10)}.pdf"`);
+      return res.end(pdf);
+    } catch (err) {
+      if (browser) await browser.close().catch(() => {});
+      return res.status(500).json({ success: false, error: 'PDF render failed: ' + err.message?.slice(0, 200) });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: safeError(err) });
+  }
+});
+
+// POST /api/analyse/:id/why-this-worked — C2: per-post AI narrative explainer
+// Body: { url, hookContext?, account context auto-fetched }
+// Returns a 3-4 sentence narrative explaining WHY this specific post outperformed
+// the account baseline, grounded in the post's hook + identity + timing + caption.
+router.post('/:id/why-this-worked', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    const { url } = req.body || {};
+    if (!url) return res.status(400).json({ success: false, error: 'url required in body' });
+    const posts = readClientFile(clientId, 'posts-latest.json');
+    const classifications = readClientFile(clientId, 'classifications.json') || [];
+    let target = null;
+    for (const arr of Object.values(posts?.platforms || {})) {
+      const p = (arr || []).find(p => p.url === url);
+      if (p) { target = p; break; }
+    }
+    if (!target) return res.status(404).json({ success: false, error: 'Post not found in latest scrape' });
+
+    // Build account baseline for the same platform
+    const platform = Object.entries(posts?.platforms || {}).find(([, arr]) => arr.some(p => p.url === url))?.[0];
+    const platformPosts = (posts?.platforms?.[platform] || []).map(p => ({
+      ...p,
+      _eng: (p.likes || 0) + (p.comments || 0) + (p.shares || 0) + (p.saves || 0),
+    }));
+    const eng = (target.likes || 0) + (target.comments || 0) + (target.shares || 0) + (target.saves || 0);
+    const sortedEng = platformPosts.map(p => p._eng).filter(v => v > 0).sort((a, b) => a - b);
+    const median = sortedEng.length > 0 ? sortedEng[Math.floor(sortedEng.length / 2)] : 0;
+    const lift = median > 0 ? (eng / median).toFixed(1) : 'n/a';
+    const cls = classifications.find(c => (c.post_id || c.url) === url) || {};
+    const dt = target.date ? new Date(target.date) : null;
+    const hourSGT = dt ? new Date(dt.getTime() + 8 * 3600 * 1000).getUTCHours() : null;
+
+    const prompt = `You are a content analyst. Explain in 3 short sentences why this post outperformed the account's baseline.
+Be specific and grounded in the data. Avoid clichés like "engaging content" or "good timing".
+Focus on: hook mechanism (first 1-3 seconds), format vs platform fit, posting time relative to audience activity, and one observed pattern from the caption.
+
+POST DATA:
+Platform: ${platform}
+Caption: ${(target.caption || '').slice(0, 400)}
+Date: ${target.date}
+Posted at ${hourSGT != null ? hourSGT + ':00 SGT' : 'unknown hour'}
+Views: ${target.views || 0}
+Likes: ${target.likes || 0} · Comments: ${target.comments || 0} · Shares: ${target.shares || 0} · Saves: ${target.saves || 0}
+Total engagement: ${eng} (account median on this platform: ${median}) — this is a ${lift}× outlier
+Classified hook type: ${cls.hook_type || 'unknown'}
+Visual style: ${cls.visual_style || 'unknown'}
+Content type: ${cls.content_type || 'unknown'}
+Sentiment: ${cls.sentiment_label || 'unknown'}
+Emotional triggers: ${(cls.emotional_triggers || []).join(', ') || 'unknown'}
+Estimated retention: ${cls.estimated_retention_pct || 'unknown'}%
+
+Return only the 3 sentences, no preamble.`;
+
+    const text = await callLLM(prompt, 'why-this-worked', { tier: 'cheap', maxTokens: 250 });
+    res.json({ success: true, data: { url, lift, narrative: text.trim() } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: safeError(err) });
+  }
+});
+
 // POST /api/analyse/:id/auto-proposal — C4: assemble a complete proposal JSON
 // Pulls brand report + classifications + outliers + clusters from disk, feeds the
 // PROMPT.md spec to the LLM, returns the JSON ready to paste into proposal-template.html.
