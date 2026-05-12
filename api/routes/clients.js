@@ -223,14 +223,39 @@ router.get('/:id/classifications', (req, res) => {
   }
 });
 
-// GET /api/clients/:id/scrape-health — A1/A6/A7 audit log
-//   Returns last 30 attempts per platform + reliability % + last_success timestamp.
+// GET /api/clients/:id/scrape-health — A1/A6/A7 audit log + B3 data quality score
+//   Returns last 30 attempts per platform + reliability % + last_success timestamp,
+//   plus a composite 0-1 data_quality_score (recency 40 + reliability 40 + completeness 20).
 router.get('/:id/scrape-health', (req, res) => {
   try {
     const data = readClientFile(req.params.id, 'scrape-health.json');
     if (!data) {
-      // No log yet (client never scraped under new code path) — return empty shape
       return res.json({ success: true, data: { perPlatform: {} } });
+    }
+    // ── B3: composite data quality score per platform ──
+    const now = Date.now();
+    for (const [, p] of Object.entries(data.perPlatform || {})) {
+      const recency = (() => {
+        if (!p.last_success) return 0;
+        const ageDays = (now - new Date(p.last_success).getTime()) / 86400000;
+        if (ageDays <= 1) return 1;
+        if (ageDays >= 14) return 0;
+        return 1 - (ageDays - 1) / 13;
+      })();
+      const reliability = (p.reliability_30d_pct || 0) / 100;
+      const last = (p.attempts || [])[p.attempts.length - 1] || {};
+      const fr = (last.fields_returned || []).length;
+      const expected = fr + (last.missing_fields || []).length;
+      const completeness = expected > 0 ? fr / expected : 0;
+      const score = +(0.4 * recency + 0.4 * reliability + 0.2 * completeness).toFixed(2);
+      const tier = score >= 0.85 ? 'green' : score >= 0.6 ? 'amber' : 'red';
+      p.data_quality_score = score;
+      p.data_quality_tier = tier;
+      p.data_quality_breakdown = {
+        recency: +recency.toFixed(2),
+        reliability: +reliability.toFixed(2),
+        completeness: +completeness.toFixed(2),
+      };
     }
     res.json({ success: true, data });
   } catch (err) {

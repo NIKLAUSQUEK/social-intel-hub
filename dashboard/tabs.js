@@ -539,7 +539,19 @@ window.renderDataHub = function(d) {
         <span style="font-size:20px;">${p.icon}</span>
         <span style="font-size:16px; font-weight:700; color:#1E293B;">${p.key.charAt(0).toUpperCase() + p.key.slice(1)}</span>
         <span style="width:32px; height:4px; border-radius:2px; background:${p.color};"></span>
-        ${reliability != null ? `<span title="30-day scrape reliability" style="font-size:10px; color:#475569; background:#F1F5F9; padding:2px 6px; border-radius:4px;">${reliability}% rel.</span>` : ''}
+        ${(() => {
+          // B3: prefer composite data-quality score when present, fall back to raw reliability
+          const dq = sh?.data_quality_score;
+          if (dq != null) {
+            const tier = sh.data_quality_tier;
+            const colour = tier === 'green' ? '#16A34A' : tier === 'amber' ? '#F59E0B' : '#EF4444';
+            const bg = tier === 'green' ? 'rgba(34,197,94,0.12)' : tier === 'amber' ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
+            const br = sh.data_quality_breakdown || {};
+            const tip = `Data quality score · ${Math.round(dq*100)}%\nRecency ${Math.round((br.recency||0)*100)}% · Reliability ${Math.round((br.reliability||0)*100)}% · Completeness ${Math.round((br.completeness||0)*100)}%`;
+            return `<span title="${tip}" style="font-size:10px; color:${colour}; background:${bg}; padding:2px 6px; border-radius:4px; cursor:help;">Quality ${(dq*100).toFixed(0)}%</span>`;
+          }
+          return reliability != null ? `<span title="30-day scrape reliability" style="font-size:10px; color:#475569; background:#F1F5F9; padding:2px 6px; border-radius:4px;">${reliability}% rel.</span>` : '';
+        })()}
         <span title="${tooltip.replace(/"/g,'&quot;')}" style="margin-left:auto; font-size:11px; color:${ss.color}; background:${ss.color}12; padding:2px 8px; border-radius:10px; cursor:help;">${freshnessLabel}</span>
       </div>
       ${bannerHtml}

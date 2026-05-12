@@ -21,6 +21,7 @@ import trendJackingRoutes from '../trend-jacking/routes.js';
 import influenceRoutes from '../influence-network/routes.js';
 import contentPerfRoutes from '../content-performance/routes.js';
 import responsePriorityRoutes from '../response-priority/routes.js';
+import webhooksRoutes from './routes/webhooks.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,6 +66,7 @@ app.use('/api/trend-jacking', trendJackingRoutes);
 app.use('/api/influence', influenceRoutes);
 app.use('/api/content-performance', contentPerfRoutes);
 app.use('/api/response-priority', responsePriorityRoutes);
+app.use('/api/webhooks', webhooksRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -72,11 +74,9 @@ app.get('/api/health', (req, res) => {
 });
 
 // ── Dashboard scrape trigger ──
-// Same scraper invocation as the Make.com webhook, but auth-gated by either
-// localhost origin OR a session cookie. No external secret needed — agency
-// users running locally can fire scrapes from the UI button.
-// Job state persisted to memory so the dashboard can poll status.
-const _scrapeJobs = new Map(); // jobId -> { status, startedAt, finishedAt, clientId, stdout, stderr, error }
+// Now backed by a proper queue with concurrency limit + retry/backoff.
+import { getScrapeQueue } from './lib/scrape-queue.js';
+const _scrapeQueue = getScrapeQueue(join(__dirname, '..'));
 
 function isLocalRequest(req) {
   const ip = req.ip || req.connection?.remoteAddress || '';
@@ -88,32 +88,15 @@ app.post('/api/scrape/run', (req, res) => {
     return res.status(403).json({ success: false, error: 'Forbidden — local-only or INTERNAL_API_KEY required' });
   }
   const clientId = req.body?.clientId;
+  const mode = req.body?.mode;
   if (clientId && !validateClientId(clientId)) {
     return res.status(400).json({ success: false, error: 'Invalid client ID' });
   }
-  const ROOT = join(__dirname, '..');
-  const jobId = 'scrape-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-  const job = { jobId, status: 'running', startedAt: new Date().toISOString(), clientId: clientId || null, stdout: '', stderr: '' };
-  _scrapeJobs.set(jobId, job);
-
-  const args = ['scraper/index.js'];
-  if (clientId) args.push('--client', clientId);
-  console.log(`[Dashboard scrape] Job ${jobId} started for ${clientId || 'ALL'}`);
-
-  const child = execFile('node', args, { cwd: ROOT, timeout: 900000, maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
-    job.stdout = stdout?.slice(-4000) || '';
-    job.stderr = stderr?.slice(-4000) || '';
-    job.finishedAt = new Date().toISOString();
-    job.status = err ? 'failed' : 'success';
-    if (err) job.error = err.message?.slice(0, 300);
-    console.log(`[Dashboard scrape] Job ${jobId} ${job.status}`);
+  const job = _scrapeQueue.enqueue({
+    clientId, mode,
+    requestedBy: isLocalRequest(req) ? 'dashboard' : 'webhook',
   });
-
-  // Stream incremental stdout (so the UI can show progress)
-  if (child.stdout) child.stdout.on('data', d => { job.stdout = (job.stdout + d.toString()).slice(-4000); });
-  if (child.stderr) child.stderr.on('data', d => { job.stderr = (job.stderr + d.toString()).slice(-4000); });
-
-  res.json({ success: true, data: { jobId, message: `Scrape queued for ${clientId || 'all clients'}` } });
+  res.json({ success: true, data: { jobId: job.jobId, message: `Scrape queued for ${clientId || 'all clients'}` } });
 });
 
 // GET status of a scrape job
@@ -121,9 +104,17 @@ app.get('/api/scrape/status/:jobId', (req, res) => {
   if (!isLocalRequest(req) && req.headers['x-internal-key'] !== process.env.INTERNAL_API_KEY) {
     return res.status(403).json({ success: false, error: 'Forbidden' });
   }
-  const job = _scrapeJobs.get(req.params.jobId);
+  const job = _scrapeQueue.status(req.params.jobId);
   if (!job) return res.status(404).json({ success: false, error: 'Job not found' });
   res.json({ success: true, data: job });
+});
+
+// GET queue snapshot — pending, running, dead-letter (B1 ops visibility)
+app.get('/api/scrape/queue', (req, res) => {
+  if (!isLocalRequest(req) && req.headers['x-internal-key'] !== process.env.INTERNAL_API_KEY) {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  res.json({ success: true, data: _scrapeQueue.snapshot() });
 });
 
 // Webhook endpoint — triggered by Make.com to run scraper
