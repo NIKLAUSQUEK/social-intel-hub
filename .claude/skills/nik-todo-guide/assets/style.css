@@ -1,0 +1,23 @@
+/* Calm, low-stimulation reading layout for Nik: one column, generous space, muted clinic palette */
+:root{--bg:#f6f5f1;--surface:#ffffff;--ink:#22262a;--muted:#5d646b;--line:#dcdad3;--accent:#2f6f6a;--done:#2f7a46;--warn:#9a6a12;--disp:"Bricolage Grotesque",system-ui,sans-serif;--body:"Atkinson Hyperlegible",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16191b;--surface:#1e2225;--ink:#e6e8e9;--muted:#a3abb1;--line:#2f3539;--accent:#7cc4bd;--done:#79c48f;--warn:#e0b45a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#16191b;--surface:#1e2225;--ink:#e6e8e9;--muted:#a3abb1;--line:#2f3539;--accent:#7cc4bd;--done:#79c48f;--warn:#e0b45a;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--body);padding-inline:18px;padding-block:28px 60px}
+main{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font:700 2rem/1.15 var(--disp);margin:0;text-wrap:balance}
+h2{font:700 1.25rem/1.3 var(--disp);margin:0 0 10px;text-wrap:balance}
+h3{font:700 1.02rem/1.3 var(--body);margin:14px 0 6px}
+.lede{color:var(--muted);margin:6px 0 0}
+.eyebrow{font:700 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+section{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+ul{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:6px}
+li{min-width:0}
+.tag{display:inline-block;font:700 .72rem var(--body);letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:99px;border:1px solid currentColor;margin-right:6px;vertical-align:1px}
+.ok{color:var(--done)}.warn{color:var(--warn)}.muted{color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;color:var(--muted);font-size:.85rem}
+a{color:var(--accent)}
+details summary{cursor:pointer;font-weight:700}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
