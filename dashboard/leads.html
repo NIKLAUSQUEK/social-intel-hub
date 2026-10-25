@@ -43,7 +43,7 @@
 </head>
 <body>
   <h1>Lead Finder</h1>
-  <div class="sub">Public profiles, businesses and buying-intent posts by niche and location. Only openly published contact details.</div>
+  <div class="sub">Public profiles, businesses, creators and buying-intent posts by niche and location. Only openly published contact details. · <a href="/comment-dm.html" style="color:#A9B4FF">Comment-to-DM →</a></div>
 
   <div class="panel">
     <div class="grid">
@@ -122,7 +122,7 @@ async function show(id) {
       ${c.leads.map(l => `<tr>
         <td class="score ${scoreClass(l.score)}">${l.score}</td>
         <td>${esc(l.name)}<br>${link(l.profileUrl)}</td>
-        <td>${esc(l.platform)}${l.intent ? '<br><span class="s-mid">intent</span>' : ''}</td>
+        <td>${esc(l.platform)}${l.intent ? '<br><span class="s-mid">intent</span>' : ''}${l.kind === 'creator' ? `<br><span class="s-hi">creator · ${esc(l.tier)}</span>${l.followers ? `<br><span class="muted">${l.followers.toLocaleString()} followers</span>` : ''}` : ''}</td>
         <td>${l.emails.map(esc).join('<br>')}</td>
         <td>${l.phones.map(esc).join('<br>')}</td>
         <td>${[l.website, ...Object.values(l.socials || {}).flat()].filter(Boolean).map(link).join('<br>')}</td>

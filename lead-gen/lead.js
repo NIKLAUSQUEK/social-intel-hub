@@ -56,6 +56,8 @@ export function scoreLead(lead) {
   const kw = String(lead.keyword || '').toLowerCase();
   if (kw && `${lead.name} ${lead.bio}`.toLowerCase().includes(kw)) s += 15;
   if (lead.intent) s += 10;
+  // Creators: micro and mid tiers are the sweet spot for local B2C reach
+  if (lead.kind === 'creator') s += { micro: 25, mid: 20, nano: 15, macro: 10 }[lead.tier] || 0;
   return Math.min(100, s);
 }
 
@@ -85,6 +87,9 @@ export function dedupeLeads(leads) {
       cur.bio ||= lead.bio;
       cur.name ||= lead.name;
       cur.intent ||= lead.intent;
+      cur.kind ||= lead.kind;
+      cur.followers ??= lead.followers;
+      cur.tier ||= lead.tier;
       cur.socials = mergeSocials(cur.socials, lead.socials);
       cur.evidence = [...cur.evidence, ...lead.evidence];
       ids.forEach(i => alias.set(i, existingKey));
@@ -100,7 +105,7 @@ export function dedupeLeads(leads) {
     .sort((a, b) => b.score - a.score);
 }
 
-const CSV_COLS = ['score', 'name', 'platform', 'profileUrl', 'emails', 'phones', 'website',
+const CSV_COLS = ['score', 'kind', 'followers', 'tier', 'name', 'platform', 'profileUrl', 'emails', 'phones', 'website',
   'socials', 'location', 'keyword', 'intent', 'bio', 'sources', 'foundAt'];
 
 function csvCell(v) {
@@ -112,7 +117,7 @@ function csvCell(v) {
 
 export function leadsToCsv(leads) {
   const rows = leads.map(l => [
-    l.score, l.name, l.platform, l.profileUrl, l.emails.join('; '), l.phones.join('; '), l.website,
+    l.score, l.kind || 'lead', l.followers ?? '', l.tier || '', l.name, l.platform, l.profileUrl, l.emails.join('; '), l.phones.join('; '), l.website,
     Object.values(l.socials || {}).flat().join('; '), l.location, l.keyword, l.intent ? 'yes' : '',
     l.bio, [...new Set(l.evidence.map(e => e.url))].join('; '), l.foundAt,
   ].map(csvCell).join(','));

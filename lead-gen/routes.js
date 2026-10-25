@@ -14,8 +14,11 @@ import {
   createCampaign, executeCampaign, getCampaign, listCampaigns, SOURCES, DEFAULT_SOURCES, addSuppression,
 } from './index.js';
 import { leadsToCsv } from './lead.js';
+import dmRoutes from './messenger/routes.js';
 
 const router = Router();
+
+router.use('/dm', dmRoutes);
 
 const SEARCH_KEYS = ['BRAVE_SEARCH_API_KEY', 'TAVILY_API_KEY', 'EXA_API_KEY'];
 const NEEDS = {

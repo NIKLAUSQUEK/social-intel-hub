@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comment-to-DM — Social Intel</title>
+  <style>
+    :root {
+      --bg:#0B1020; --panel:#141A2E; --panel-2:#1A2140;
+      --text:#E6E8EF; --muted:#8B92A8; --accent:#7C5CFF;
+      --ok:#4ADE80; --warn:#FBBF24; --err:#FF6B6B;
+      --line:rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 24px; }
+    h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    h2 { font-size: 15px; margin: 0 0 10px; }
+    a { color: #A9B4FF; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    input, textarea, button { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; width: 100%; }
+    textarea { min-height: 70px; resize: vertical; }
+    button { cursor: pointer; width: auto; }
+    button.primary { background: var(--accent); border-color: var(--accent); font-weight: 600; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-top: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    .muted { color: var(--muted); }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: var(--panel-2); }
+    .qualified { color: var(--ok); } .contacted { color: var(--warn); } .opted-out, .dm-failed { color: var(--err); }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+  </style>
+</head>
+<body>
+  <h1>Comment-to-DM</h1>
+  <div class="sub">Someone comments a keyword on your Facebook or Instagram post → your Page DMs them → they land here as an opted-in lead. Official Meta API only. · <a href="/leads.html">← Lead Finder</a></div>
+
+  <div class="panel">
+    <h2>New rule</h2>
+    <div class="grid">
+      <div><label>Facebook Page ID</label><input id="pageId" placeholder="1234567890" /></div>
+      <div><label>Instagram account ID (optional)</label><input id="igUserId" placeholder="17841400000000000" /></div>
+      <div><label>Post / media ID (blank = all posts)</label><input id="postId" /></div>
+      <div><label>Keywords (comma separated)</label><input id="keywords" placeholder="PRICE, INFO" /></div>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div><label>DM text (sent once per comment)</label><textarea id="dmText" placeholder="Hi! Here's our price list: … Reply with your email and we'll send the full brochure."></textarea></div>
+      <div><label>Public reply under the comment (optional)</label><textarea id="publicReply" placeholder="Sent you a DM 📩"></textarea></div>
+      <div><label>Follow-up when they share email/phone (optional)</label><textarea id="followUp" placeholder="Thanks! Brochure on its way."></textarea></div>
+    </div>
+    <div style="margin-top:12px"><button class="primary" id="save">Save rule</button> <span id="msg" class="muted"></span></div>
+  </div>
+
+  <div class="panel">
+    <h2>Rules</h2>
+    <div id="rules" class="muted">Loading…</div>
+  </div>
+
+  <div class="panel">
+    <div class="row"><h2>Inbox leads</h2><a href="/api/leads/dm/inbox/export.csv"><button>Export CSV</button></a></div>
+    <div id="inbox" class="muted">Loading…</div>
+  </div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+async function api(path, opts) {
+  const r = await fetch('/api/leads/dm' + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const j = await r.json();
+  if (!j.success) throw new Error(j.error || r.status);
+  return j.data;
+}
+
+async function loadRules() {
+  const rules = await api('/rules');
+  $('rules').innerHTML = rules.length ? `<table>
+    <tr><th>Keywords</th><th>Page / IG</th><th>Post</th><th>DM</th><th></th></tr>
+    ${rules.map(r => `<tr><td>${r.keywords.map(k => `<span class="pill">${esc(k)}</span>`).join(' ')}</td>
+      <td>${esc(r.pageId)}${r.igUserId ? `<br><span class="muted">IG ${esc(r.igUserId)}</span>` : ''}</td>
+      <td>${esc(r.postId || 'all posts')}</td><td class="muted">${esc(r.dmText.slice(0, 120))}</td>
+      <td><button data-del="${esc(r.id)}">Delete</button></td></tr>`).join('')}
+  </table>` : 'No rules yet.';
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { await api('/rules/' + b.dataset.del, { method: 'DELETE' }); loadRules(); });
+}
+
+async function loadInbox() {
+  const inbox = await api('/inbox');
+  $('inbox').innerHTML = inbox.length ? `<table>
+    <tr><th>Name</th><th>Platform</th><th>Status</th><th>Email</th><th>Phone</th><th>First comment</th><th>Updated</th></tr>
+    ${inbox.map(l => `<tr><td>${esc(l.name || l.userId)}</td><td>${esc(l.platform)}</td>
+      <td class="${esc(l.status)}">${esc(l.status)}</td><td>${(l.emails || []).map(esc).join('<br>')}</td>
+      <td>${(l.phones || []).map(esc).join('<br>')}</td>
+      <td class="muted">${esc(l.events?.find(e => e.type === 'comment')?.text || '')}</td>
+      <td class="muted">${esc((l.updatedAt || '').slice(0, 16).replace('T', ' '))}</td></tr>`).join('')}
+  </table>` : 'No one has commented a keyword yet.';
+}
+
+$('save').onclick = async () => {
+  try {
+    await api('/rules', { method: 'POST', body: JSON.stringify(Object.fromEntries(
+      ['pageId', 'igUserId', 'postId', 'keywords', 'dmText', 'publicReply', 'followUp'].map(k => [k, $(k).value])) ) });
+    $('msg').textContent = 'Saved.';
+    loadRules();
+  } catch (e) { $('msg').textContent = e.message; }
+};
+
+loadRules().catch(e => $('rules').textContent = e.message);
+loadInbox().catch(e => $('inbox').textContent = e.message);
+setInterval(() => loadInbox().catch(() => {}), 15000);
+</script>
+</body>
+</html>

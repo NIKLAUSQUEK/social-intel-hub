@@ -37,7 +37,8 @@ const allowedOrigins = process.env.CORS_ORIGINS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' ? allowedOrigins : true,
 }));
-app.use(express.json({ limit: '1mb' }));
+// rawBody kept for webhook signature checks (Meta X-Hub-Signature-256)
+app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 
 // Serve dashboard static files
 app.use(express.static(join(__dirname, '..', 'dashboard')));

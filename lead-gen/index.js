@@ -9,19 +9,17 @@
  */
 
 import { mkdirSync, readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join } from 'path';
 import { randomUUID } from 'crypto';
 import { findOnPlatform, PLATFORMS } from './sources/social-search.js';
 import { findPlaces } from './sources/google-maps.js';
 import { findChannels } from './sources/youtube.js';
 import { findIntentPosts } from './sources/reddit.js';
+import { findCreators, CREATOR_PLATFORMS } from './sources/creators.js';
 import { enrichFromWebsite } from './enrich.js';
 import { dedupeLeads } from './lead.js';
+import { DATA_DIR } from './paths.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = process.env.LEADGEN_DATA_DIR
-  || (process.env.VERCEL ? '/tmp/leads' : join(__dirname, '..', 'data', 'leads'));
 const CAMPAIGN_DIR = join(DATA_DIR, 'campaigns');
 const SUPPRESSION_FILE = join(DATA_DIR, 'suppression.json');
 
@@ -31,6 +29,7 @@ export const SOURCES = {
   'youtube-api': findChannels,
   'google-maps': findPlaces,
   reddit: findIntentPosts,
+  ...Object.fromEntries(CREATOR_PLATFORMS.map(p => [`creators-${p}`, o => findCreators(p, o)])),
 };
 
 export const DEFAULT_SOURCES = ['instagram', 'facebook', 'linkedin', 'tiktok', 'google-maps'];
@@ -143,7 +142,8 @@ export async function executeCampaign(campaign, { onProgress } = {}) {
   const unique = leads.length;
   leads = leads.filter(l => !isSuppressed(l, suppression));
   const suppressed = unique - leads.length;
-  if (requireContact) leads = leads.filter(l => l.emails.length || l.phones.length || l.intent);
+  // Creators are reached by DM/collab, so they don't need a scraped contact to be useful
+  if (requireContact) leads = leads.filter(l => l.kind === 'creator' || l.emails.length || l.phones.length || l.intent);
 
   c.leads = leads.slice(0, limit);
   c.groups = [...new Map(c.groups.map(g => [g.url, g])).values()];
