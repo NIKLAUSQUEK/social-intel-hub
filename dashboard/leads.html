@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lead Finder — Social Intel</title>
+  <style>
+    :root {
+      --bg:#0B1020; --panel:#141A2E; --panel-2:#1A2140;
+      --text:#E6E8EF; --muted:#8B92A8; --accent:#7C5CFF;
+      --ok:#4ADE80; --warn:#FBBF24; --err:#FF6B6B;
+      --line:rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 24px; }
+    h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    h2 { font-size: 15px; margin: 0 0 10px; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    select, button, input { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; }
+    button { cursor: pointer; }
+    button.primary { background: var(--accent); border-color: var(--accent); font-weight: 600; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-top: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .sources { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; font-size: 12px; }
+    .chip.off { opacity: 0.45; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--panel); }
+    td a { color: #A9B4FF; text-decoration: none; word-break: break-all; }
+    .score { font-weight: 700; }
+    .s-hi { color: var(--ok); } .s-mid { color: var(--warn); } .s-lo { color: var(--muted); }
+    .muted { color: var(--muted); }
+    .log { font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted); max-height: 160px; overflow: auto; }
+    .err { color: var(--err); }
+    .scroll { max-height: 560px; overflow: auto; }
+    .stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; }
+    .stats b { font-size: 18px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Lead Finder</h1>
+  <div class="sub">Public profiles, businesses and buying-intent posts by niche and location. Only openly published contact details.</div>
+
+  <div class="panel">
+    <div class="grid">
+      <div><label>Keywords (comma separated)</label><input id="kw" placeholder="dentist, orthodontist" style="width:100%" /></div>
+      <div><label>Location</label><input id="loc" placeholder="Singapore" style="width:100%" /></div>
+      <div><label>Max leads</label><input id="limit" type="number" value="100" min="1" max="1000" style="width:100%" /></div>
+    </div>
+    <label style="margin-top:12px">Sources</label>
+    <div class="sources" id="sources"></div>
+    <div class="row" style="margin-top:14px">
+      <label class="chip"><input type="checkbox" id="enrich" checked /> Enrich from websites</label>
+      <label class="chip"><input type="checkbox" id="req" checked /> Only leads with contact or intent</label>
+      <button class="primary" id="run">Find leads</button>
+      <span id="status" class="muted"></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="row" style="justify-content:space-between">
+      <h2>Campaigns</h2>
+      <select id="campaigns"></select>
+    </div>
+    <div id="result"></div>
+  </div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const link = u => u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>` : '';
+let pollTimer;
+
+async function api(path, opts) {
+  const r = await fetch('/api/leads' + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const j = await r.json();
+  if (!j.success) throw new Error(j.error || r.status);
+  return j.data;
+}
+
+async function loadSources() {
+  const list = await api('/sources');
+  $('sources').innerHTML = list.map(s => `
+    <label class="chip ${s.ready ? '' : 'off'}" title="${s.ready ? 'ready' : 'needs ' + esc(s.needs.join(', '))}">
+      <input type="checkbox" value="${esc(s.id)}" ${s.default && s.ready ? 'checked' : ''} ${s.ready ? '' : 'disabled'} /> ${esc(s.id)}
+    </label>`).join('');
+}
+
+async function loadCampaigns(selectId) {
+  const list = await api('/campaigns');
+  $('campaigns').innerHTML = list.length
+    ? list.map(c => `<option value="${c.id}">${esc(c.name)} · ${c.leadCount} leads · ${c.status}</option>`).join('')
+    : '<option value="">No campaigns yet</option>';
+  if (selectId) $('campaigns').value = selectId;
+  if ($('campaigns').value) show($('campaigns').value);
+}
+
+function scoreClass(s) { return s >= 60 ? 's-hi' : s >= 35 ? 's-mid' : 's-lo'; }
+
+async function show(id) {
+  clearTimeout(pollTimer);
+  const c = await api('/campaigns/' + id);
+  const running = c.status !== 'done';
+  const st = c.stats || {};
+  $('result').innerHTML = `
+    <div class="stats" style="margin:8px 0 14px">
+      <div><b>${running ? `${c.progress.done}/${c.progress.total}` : st.kept}</b><span class="muted">${running ? 'searches' : 'leads'}</span></div>
+      ${running ? '' : `<div><b>${st.withEmail}</b><span class="muted">with email</span></div>
+      <div><b>${st.withPhone}</b><span class="muted">with phone</span></div>
+      <div><b>${c.groups.length}</b><span class="muted">groups</span></div>
+      <div><a href="/api/leads/campaigns/${c.id}/export.csv"><button>Export CSV</button></a></div>`}
+    </div>
+    <div class="log">${c.log.map(l => l.error
+      ? `<div class="err">✗ ${esc(l.source)} · ${esc(l.keyword)} — ${esc(l.error)}</div>`
+      : `<div>✓ ${esc(l.source)} · ${esc(l.keyword)} — ${l.found} hits</div>`).join('')}</div>
+    ${c.leads.length ? `<div class="scroll" style="margin-top:14px"><table>
+      <tr><th>Score</th><th>Name</th><th>Platform</th><th>Email</th><th>Phone</th><th>Website / socials</th><th>Bio</th></tr>
+      ${c.leads.map(l => `<tr>
+        <td class="score ${scoreClass(l.score)}">${l.score}</td>
+        <td>${esc(l.name)}<br>${link(l.profileUrl)}</td>
+        <td>${esc(l.platform)}${l.intent ? '<br><span class="s-mid">intent</span>' : ''}</td>
+        <td>${l.emails.map(esc).join('<br>')}</td>
+        <td>${l.phones.map(esc).join('<br>')}</td>
+        <td>${[l.website, ...Object.values(l.socials || {}).flat()].filter(Boolean).map(link).join('<br>')}</td>
+        <td class="muted">${esc(l.bio.slice(0, 180))}</td></tr>`).join('')}
+    </table></div>` : ''}
+    ${c.groups.length ? `<h2 style="margin-top:18px">Groups &amp; communities</h2><table>
+      <tr><th>Group</th><th>Snippet</th></tr>
+      ${c.groups.map(g => `<tr><td>${esc(g.name)}<br>${link(g.url)}</td><td class="muted">${esc(g.snippet.slice(0, 200))}</td></tr>`).join('')}
+    </table>` : ''}`;
+  if (running) pollTimer = setTimeout(() => show(id), 3000);
+  else if ($('status').dataset.id === id) { $('status').textContent = 'Done.'; $('run').disabled = false; loadCampaigns(id); delete $('status').dataset.id; }
+}
+
+$('run').onclick = async () => {
+  const sources = [...document.querySelectorAll('#sources input:checked')].map(i => i.value);
+  if (!$('kw').value.trim()) return alert('Add at least one keyword');
+  if (!sources.length) return alert('Pick at least one source');
+  $('run').disabled = true;
+  $('status').textContent = 'Running…';
+  try {
+    const { id } = await api('/campaigns', { method: 'POST', body: JSON.stringify({
+      keywords: $('kw').value, location: $('loc').value, sources,
+      limit: Number($('limit').value), enrich: $('enrich').checked, requireContact: $('req').checked,
+    }) });
+    $('status').dataset.id = id;
+    await loadCampaigns(id);
+  } catch (e) {
+    $('status').textContent = e.message; $('run').disabled = false;
+  }
+};
+$('campaigns').onchange = e => e.target.value && show(e.target.value);
+
+loadSources().catch(e => $('sources').textContent = e.message);
+loadCampaigns().catch(() => {});
+</script>
+</body>
+</html>
