@@ -9,6 +9,8 @@
     "scrape:client": "node scraper/index.js --client",
     "api": "node api/server.js",
     "dev": "node api/server.js",
+    "leads": "node lead-gen/cli.js",
+    "test:leads": "node --test lead-gen/test/*.test.js",
     "bot": "node bot/telegram.js",
     "bot:daily": "node bot/telegram.js --daily"
   },

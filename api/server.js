@@ -22,6 +22,7 @@ import influenceRoutes from '../influence-network/routes.js';
 import contentPerfRoutes from '../content-performance/routes.js';
 import responsePriorityRoutes from '../response-priority/routes.js';
 import webhooksRoutes from './routes/webhooks.js';
+import leadGenRoutes from '../lead-gen/routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,7 +37,8 @@ const allowedOrigins = process.env.CORS_ORIGINS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' ? allowedOrigins : true,
 }));
-app.use(express.json({ limit: '1mb' }));
+// rawBody kept for webhook signature checks (Meta X-Hub-Signature-256)
+app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 
 // Serve dashboard static files
 app.use(express.static(join(__dirname, '..', 'dashboard')));
@@ -67,6 +69,7 @@ app.use('/api/influence', influenceRoutes);
 app.use('/api/content-performance', contentPerfRoutes);
 app.use('/api/response-priority', responsePriorityRoutes);
 app.use('/api/webhooks', webhooksRoutes);
+app.use('/api/leads', leadGenRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
